@@ -75,19 +75,31 @@ void DollyCam::Deactivate()
 }
 
 float lastWrite = -5000.f;
+float diff = .0f;
+bool isFirst = true;
 void DollyCam::Apply()
 {
+
+
 	ReplayWrapper sw = gameWrapper->GetGameEventAsReplay();
 	int currentFrame = sw.GetCurrentReplayFrame();
+	cvarManager->log("Frame: " + to_string(currentFrame) + ". Replay time: " + to_string(sw.GetReplayTimeElapsed()));
 	if (currentFrame == currentPath->begin()->first)
 	{
-		sw.SetSecondsElapsed(sw.GetReplayTimeElapsed());
+		if (isFirst) {
+			diff = sw.GetSecondsElapsed();
+			isFirst = false;
+		}
+	}
+	else {
+		isFirst = true;
 	}
 
 	CameraWrapper flyCam = gameWrapper->GetCamera();
-	NewPOV pov = interpStrategy->GetPOV(sw.GetSecondsElapsed(), sw.GetCurrentReplayFrame());
+	NewPOV pov = interpStrategy->GetPOV(sw.GetSecondsElapsed() - diff + currentPath->begin()->second.timeStamp, sw.GetCurrentReplayFrame());
 	if (pov.FOV < 1) { //Invalid camerastate
 		return;
 	}
-	flyCam.SetPOV(pov.ToPOV());
+	gameApplier->SetPOV(pov.location, pov.rotation, pov.FOV);
+	//flyCam.SetPOV(pov.ToPOV());
 }
