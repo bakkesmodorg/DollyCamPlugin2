@@ -7,9 +7,10 @@ LinearInterpStrategy::LinearInterpStrategy(std::shared_ptr<savetype> _camPath)
 
 NewPOV LinearInterpStrategy::GetPOV(float gameTime, int latestFrame)
 {
-	auto currentSnapshot = camPath->lower_bound(latestFrame);
-	auto nextSnapshot = std::next(currentSnapshot);
-	if (currentSnapshot == camPath->end() || nextSnapshot == camPath->end()) //We're at the end of the playback
+	auto nextSnapshot = camPath->upper_bound(latestFrame);
+	auto currentSnapshot = std::prev(nextSnapshot);
+	 // std::next(currentSnapshot);
+	if (currentSnapshot == camPath->end() || nextSnapshot == camPath->end() || camPath->begin()->first > latestFrame) //We're at the end of the playback
 		return{ Vector(0), CustomRotator(0,0,0), 0 };
 	
 

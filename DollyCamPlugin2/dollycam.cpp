@@ -32,7 +32,7 @@ bool DollyCam::TakeSnapshot()
 	save.rotation = CustomRotator(flyCam.GetRotation());
 	save.frame = sw.GetCurrentReplayFrame();
 	
-	currentPath->insert(std::make_pair(save.timeStamp, save));
+	currentPath->insert(std::make_pair(save.frame, save));
 }
 
 bool DollyCam::IsActive()
@@ -74,12 +74,20 @@ void DollyCam::Deactivate()
 	cvarManager->log("Dollycam deactivated");
 }
 
+float lastWrite = -5000.f;
 void DollyCam::Apply()
 {
 	ReplayWrapper sw = gameWrapper->GetGameEventAsReplay();
+	int currentFrame = sw.GetCurrentReplayFrame();
+	if (currentFrame == currentPath->begin()->first)
+	{
+		sw.SetSecondsElapsed(sw.GetReplayTimeElapsed());
+	}
+
 	CameraWrapper flyCam = gameWrapper->GetCamera();
-	NewPOV pov = interpStrategy->GetPOV(sw.GetReplayTimeElapsed(), sw.GetCurrentReplayFrame());
-	if (pov.FOV < 1) //Invalid camerastate
+	NewPOV pov = interpStrategy->GetPOV(sw.GetSecondsElapsed(), sw.GetCurrentReplayFrame());
+	if (pov.FOV < 1) { //Invalid camerastate
 		return;
+	}
 	flyCam.SetPOV(pov.ToPOV());
 }
