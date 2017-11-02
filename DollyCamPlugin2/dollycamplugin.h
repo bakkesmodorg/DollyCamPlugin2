@@ -13,4 +13,5 @@ public:
 	virtual void onUnload();
 	void onTick(std::string funcName);
 	void OnAllCommand(vector<string> params);
+	void OnReplayCommand(vector<string> params);
 };

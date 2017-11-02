@@ -16,11 +16,13 @@ void DollyCamPlugin::onLoad()
 	std::shared_ptr<IGameApplier> gameApplier = std::make_shared<RealGameApplier>(RealGameApplier(gameWrapper));
 	dollyCam = std::make_shared<DollyCam>(DollyCam(gameWrapper, cvarManager, gameApplier));
 
-	gameWrapper->HookEvent("Function TAGame.PlayerController_TA.PrePhysicsStep", bind(&DollyCamPlugin::onTick, this, _1));
-	cvarManager->registerCvar("rebound_shotspeed", "780", "Shotspeed to use for rebounds", true, true, 0, true, 2000);
-	cvarManager->registerCvar("rebound_addedheight", "(300, 1400)", "Height above the backboard to shoot", true, true, -5000, true, 10000);
+	gameWrapper->HookEvent("Function TAGame.CameraState_ReplayFly_TA.UpdatePOV", bind(&DollyCamPlugin::onTick, this, _1));
+	cvarManager->registerCvar("dolly_interpmode", "0", "Used interp mode", true, true, 0, true, 2000);
 
 	cvarManager->registerNotifier("dolly_path_clear", bind(&DollyCamPlugin::OnAllCommand, this, _1));
+	cvarManager->registerNotifier("dolly_snapshot_take", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
+	cvarManager->registerNotifier("dolly_activate", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
+	cvarManager->registerNotifier("dolly_deactivate", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
 }
 
 void DollyCamPlugin::onUnload()
@@ -30,13 +32,33 @@ void DollyCamPlugin::onUnload()
 
 void DollyCamPlugin::onTick(std::string funcName)
 {
-	if (!IsApplicable())
+	if (!IsApplicable() || !dollyCam->IsActive())
 		return;
-	CameraWrapper camera = gameWrapper->GetCamera();
+	dollyCam->Apply();
 }
 
 //[&cm = this->cvarManager, &gw = this->gameWrapper](vector<string>)
 void DollyCamPlugin::OnAllCommand(vector<string> params)
 {
+
+}
+
+void DollyCamPlugin::OnReplayCommand(vector<string> params)
+{
+	if (!IsApplicable())
+		return;
+	string command = params.at(0);
+	if (command.compare("dolly_snapshot_take") == 0)
+	{
+		dollyCam->TakeSnapshot();
+	}
+	else if (command.compare("dolly_deactivate") == 0)
+	{
+		dollyCam->Deactivate();
+	}
+	else if (command.compare("dolly_activate") == 0)
+	{
+		dollyCam->Activate();
+	}
 
 }

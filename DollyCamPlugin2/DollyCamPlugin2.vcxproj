@@ -122,6 +122,7 @@
     <ClCompile Include="dollycamplugin.cpp" />
     <ClCompile Include="gameapplier.cpp" />
     <ClCompile Include="interpstrategy.cpp" />
+    <ClCompile Include="models.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

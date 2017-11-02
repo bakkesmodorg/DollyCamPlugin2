@@ -1,12 +1,13 @@
 #pragma once
 #include "utils\customrotator.h"
-#define savetype std::map<float, CameraSnapshot>
+#define savetype std::map<int, CameraSnapshot>
 
 struct NewPOV
 {
 	Vector location;
 	CustomRotator rotation;
 	float FOV;
+	POV ToPOV();
 };
 
 struct CameraSnapshot
