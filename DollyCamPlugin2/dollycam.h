@@ -15,7 +15,12 @@ private:
 	std::shared_ptr<CVarManagerWrapper> cvarManager;
 	std::shared_ptr<IGameApplier> gameApplier;
 	std::shared_ptr<InterpStrategy> interpStrategy;
+
+	std::shared_ptr<savetype> currentRenderPath;
 	bool isActive = false;
+	bool renderPath = false;
+
+	void UpdateRenderPath();
 public:
 	DollyCam(std::shared_ptr<GameWrapper> _gameWrapper, std::shared_ptr<CVarManagerWrapper> _cvarManager, std::shared_ptr<IGameApplier> _gameApplier);
 	~DollyCam();
@@ -26,5 +31,8 @@ public:
 	void Activate();
 	void Deactivate();
 	void Apply();
+	void SetRenderPath(bool render);
+	void Render(CanvasWrapper cw);
+	shared_ptr<InterpStrategy> CreateInterpStrategy();
 };
 

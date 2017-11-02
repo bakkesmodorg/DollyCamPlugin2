@@ -24,7 +24,7 @@ NewPOV LinearInterpStrategy::GetPOV(float gameTime, int latestFrame)
 	NewPOV pov; //((currentSnapshot->second.rotation.diffTo(nextSnapshot->second.rotation))
 	pov.location = currentSnapshot->second.location + (((nextSnapshot->second.location - currentSnapshot->second.location) * timeElapsed)/snap);
 
-	CustomRotator dif = (nextSnapshot->second.rotation - currentSnapshot->second.rotation);
+	CustomRotator dif = (currentSnapshot->second.rotation.diffTo(nextSnapshot->second.rotation));
 	CustomRotator dif2 = dif * percElapsed;
 	CustomRotator rot2 = currentSnapshot->second.rotation + dif2;
 	pov.rotation = rot2;

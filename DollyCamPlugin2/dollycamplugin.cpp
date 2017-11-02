@@ -17,12 +17,14 @@ void DollyCamPlugin::onLoad()
 	dollyCam = std::make_shared<DollyCam>(DollyCam(gameWrapper, cvarManager, gameApplier));
 
 	gameWrapper->HookEvent("Function TAGame.CameraState_ReplayFly_TA.UpdatePOV", bind(&DollyCamPlugin::onTick, this, _1));
+	gameWrapper->RegisterDrawable(bind(&DollyCamPlugin::onRender, this, _1));
 	cvarManager->registerCvar("dolly_interpmode", "0", "Used interp mode", true, true, 0, true, 2000);
 
 	cvarManager->registerNotifier("dolly_path_clear", bind(&DollyCamPlugin::OnAllCommand, this, _1));
 	cvarManager->registerNotifier("dolly_snapshot_take", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
 	cvarManager->registerNotifier("dolly_activate", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
 	cvarManager->registerNotifier("dolly_deactivate", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
+	dollyCam->SetRenderPath(true);
 }
 
 void DollyCamPlugin::onUnload()
@@ -61,4 +63,11 @@ void DollyCamPlugin::OnReplayCommand(vector<string> params)
 		dollyCam->Activate();
 	}
 
+}
+
+void DollyCamPlugin::onRender(CanvasWrapper canvas)
+{
+	if (!IsApplicable())
+		return;
+	dollyCam->Render(canvas);
 }
