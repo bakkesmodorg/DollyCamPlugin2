@@ -19,16 +19,19 @@ void DollyCamPlugin::onLoad()
 {
 	std::shared_ptr<IGameApplier> gameApplier = std::make_shared<RealGameApplier>(RealGameApplier(gameWrapper));
 	dollyCam = std::make_shared<DollyCam>(DollyCam(gameWrapper, cvarManager, gameApplier));
+	renderCameraPath = std::make_shared<bool>(true);
 
 	gameWrapper->HookEvent("Function TAGame.CameraState_ReplayFly_TA.UpdatePOV", bind(&DollyCamPlugin::onTick, this, _1));
 	gameWrapper->RegisterDrawable(bind(&DollyCamPlugin::onRender, this, _1));
+
 	cvarManager->registerCvar("dolly_interpmode", "0", "Used interp mode", true, true, 0, true, 2000).addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
+	cvarManager->registerCvar("dolly_render", "1", "Render the current camera path", true, true, 0, true, 1).bindTo(renderCameraPath);
 
 	cvarManager->registerNotifier("dolly_path_clear", bind(&DollyCamPlugin::OnAllCommand, this, _1));
 	cvarManager->registerNotifier("dolly_snapshot_take", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
 	cvarManager->registerNotifier("dolly_activate", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
 	cvarManager->registerNotifier("dolly_deactivate", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
-
+	
 	cvarManager->registerNotifier("dolly_cam_show", bind(&DollyCamPlugin::OnCamCommand, this, _1));
 	cvarManager->registerNotifier("dolly_cam_set_location", bind(&DollyCamPlugin::OnCamCommand, this, _1));
 	cvarManager->registerNotifier("dolly_cam_set_rotation", bind(&DollyCamPlugin::OnCamCommand, this, _1));
@@ -105,13 +108,11 @@ void DollyCamPlugin::OnCamCommand(vector<string> params)
 	}
 	else if (command.compare("dolly_cam_set_frame") == 0)
 	{
-		/*cvarManager->log("Command not supported, please just edit the json manually");
-		return;*/
 		if (params.size() < 2) {
 			cvarManager->log("Usage: " + params.at(0) + " frame");
 			return;
 		}
-		float timestamp = get_safe_float(params.at(1));
+		float timestamp = get_safe_int(params.at(1));
 		//gw->GetGameEventAsReplay().SetSecondsElapsed(timestamp);
 		gameWrapper->GetGameEventAsReplay().SkipToFrame(timestamp);
 	}
@@ -138,7 +139,16 @@ void DollyCamPlugin::OnReplayCommand(vector<string> params)
 	string command = params.at(0);
 	if (command.compare("dolly_snapshot_take") == 0)
 	{
-		dollyCam->TakeSnapshot();
+		CameraSnapshot snapshot = dollyCam->TakeSnapshot();
+		if (snapshot.frame < 0)
+		{
+			cvarManager->log("Failed to create snapshot");
+		}
+		else
+		{
+			cvarManager->log("Saved snapshot #" + to_string(snapshot.frame));
+			cvarManager->executeCommand(false);
+		}
 	}
 	else if (command.compare("dolly_deactivate") == 0)
 	{
@@ -153,7 +163,7 @@ void DollyCamPlugin::OnReplayCommand(vector<string> params)
 
 void DollyCamPlugin::onRender(CanvasWrapper canvas)
 {
-	if (!IsApplicable())
+	if (!IsApplicable() || !*renderCameraPath)
 		return;
 	dollyCam->Render(canvas);
 }

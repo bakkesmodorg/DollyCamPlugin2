@@ -7,6 +7,7 @@ class DollyCamPlugin : public BakkesMod::Plugin::BakkesModPlugin
 {
 private:
 	std::shared_ptr<DollyCam> dollyCam;
+	std::shared_ptr<bool> renderCameraPath;
 	bool IsApplicable();
 public:
 	virtual void onLoad();

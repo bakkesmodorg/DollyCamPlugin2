@@ -26,7 +26,7 @@ public:
 	~DollyCam();
 
 	//Takes a snapshot of the current camera state and adds it to current path, returns true if taking snapshot was sucsessfull
-	bool TakeSnapshot();
+	CameraSnapshot TakeSnapshot();
 	bool IsActive();
 	void Activate();
 	void Deactivate();

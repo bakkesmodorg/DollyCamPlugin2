@@ -49,17 +49,18 @@ DollyCam::~DollyCam()
 {
 }
 
-bool DollyCam::TakeSnapshot()
+CameraSnapshot DollyCam::TakeSnapshot()
 {
+	CameraSnapshot save = { -1 };
 	if (!gameWrapper->IsInReplay())
-		return false;
+		return save;
 
 	ReplayWrapper sw = gameWrapper->GetGameEventAsReplay();
 	CameraWrapper flyCam = gameWrapper->GetCamera();
 	if (sw.IsNull())
-		return false;
+		return save;
 
-	CameraSnapshot save;
+	
 	save.timeStamp = sw.GetReplayTimeElapsed();
 	save.FOV = flyCam.GetFOV();
 	save.location = flyCam.GetLocation();
@@ -69,6 +70,7 @@ bool DollyCam::TakeSnapshot()
 	currentPath->insert(std::make_pair(save.frame, save));
 	interpStrategy = CreateInterpStrategy();
 	UpdateRenderPath();
+	return save;
 }
 
 bool DollyCam::IsActive()
