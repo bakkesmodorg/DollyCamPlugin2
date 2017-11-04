@@ -14,17 +14,26 @@ void DollyCam::UpdateRenderPath()
 	
 	float replayTickRate = 1.f / 30.f;//Retrieve this from game later
 
-	for (int i = startFrame; i < endFrame; i++)
+	int lastSyncedFrame = startFrame;
+
+	for (int i = startFrame; i <= endFrame; i++)
 	{
+		if (currentPath->find(i) != currentPath->end())
+		{
+			lastSyncedFrame = i;
+			beginTime = currentPath->find(i)->second.timeStamp;
+		}
 		CameraSnapshot snapshot;
 		snapshot.frame = i;
-		snapshot.timeStamp = beginTime + (replayTickRate * (i - startFrame));
+		snapshot.timeStamp = beginTime + (replayTickRate * (i - lastSyncedFrame));
 		NewPOV pov = strategy->GetPOV(snapshot.timeStamp, i);
 		snapshot.location = pov.location;
 		snapshot.rotation = pov.rotation;
 		snapshot.FOV = pov.FOV;
 
-		currentRenderPath->insert(make_pair(i, snapshot));
+		if(snapshot.FOV > 1)
+			currentRenderPath->insert(make_pair(i, snapshot));
+
 	}
 }
 
@@ -58,6 +67,7 @@ bool DollyCam::TakeSnapshot()
 	save.frame = sw.GetCurrentReplayFrame();
 	
 	currentPath->insert(std::make_pair(save.frame, save));
+	interpStrategy = CreateInterpStrategy();
 	UpdateRenderPath();
 }
 
@@ -96,6 +106,8 @@ void DollyCam::Apply()
 {
 	ReplayWrapper sw = gameWrapper->GetGameEventAsReplay();
 	int currentFrame = sw.GetCurrentReplayFrame();
+	if (currentFrame < currentPath->begin()->first || currentFrame > (--currentPath->end())->first)
+		return;
 	cvarManager->log("Frame: " + to_string(currentFrame) + ". Replay time: " + to_string(sw.GetReplayTimeElapsed()));
 	if (currentFrame == currentPath->begin()->first)
 	{
@@ -116,6 +128,12 @@ void DollyCam::Apply()
 	//flyCam.SetPOV(pov.ToPOV());
 }
 
+void DollyCam::Reset()
+{
+	this->currentPath->clear();
+	this->RefreshInterpData();
+}
+
 void DollyCam::SetRenderPath(bool render)
 {
 	renderPath = render;
@@ -125,21 +143,37 @@ void DollyCam::Render(CanvasWrapper cw)
 {
 	if (!renderPath || !currentRenderPath || currentRenderPath->size() < 2)
 		return;
+
+	ReplayWrapper sw = gameWrapper->GetGameEventAsReplay();
+	int currentFrame = sw.GetCurrentReplayFrame();
+
 	Vector2 prevLine = cw.Project(currentRenderPath->begin()->second.location);
 	Vector2 canvasSize = cw.GetSize();
+
+	int colTest = 0;
 	for (auto it = (++currentRenderPath->begin()); it != currentRenderPath->end(); ++it)
 	{
 		Vector2 line = cw.Project(it->second.location);
 
-		cw.SetColor(255, 255, 1, 122);
+		if (it->first - 2 < currentFrame && it->first + 2 > currentFrame)
+		{
+			cw.SetColor(255, 0, 0, 255);
+		}
+		else
+		{
+			cw.SetColor(0, 0, colTest, 255);
+			colTest = colTest == 0 ? 255 : 255;
+		}
 
 		line.X = max(0, line.X);
 		line.X = min(line.X, canvasSize.X);
 		line.Y = max(0, line.Y);
 		line.Y = min(line.Y, canvasSize.Y);
-		if (!((line.X < .1 || line.X >= canvasSize.X - .5) && (line.Y < .1 || line.Y >= canvasSize.Y - .5)))
+		if (!(((line.X < .1 || line.X >= canvasSize.X - .5) && (line.Y < .1 || line.Y >= canvasSize.Y - .5)) || ((prevLine.X < .1 || prevLine.X >= canvasSize.X - .5) && (prevLine.Y < .1 || prevLine.Y >= canvasSize.Y - .5))))
 		{
 			cw.DrawLine(prevLine, line);
+			cw.DrawLine(prevLine.minus({ 1,1 }), line.minus({ 1,1 })); //make lines thicker
+			cw.DrawLine(prevLine.minus({ -1,-1 }), line.minus({ -1,-1 }));
 		}
 		
 		prevLine = line;
@@ -153,10 +187,25 @@ void DollyCam::Render(CanvasWrapper cw)
 			boxLoc.X -= 5;
 			boxLoc.Y -= 5;
 			cw.SetPosition(boxLoc);
-			cw.DrawBox({ 5,5 });
+			cw.FillBox({ 10, 10});
 		}
 	}
 }
+
+void DollyCam::RefreshInterpData()
+{
+	interpStrategy = CreateInterpStrategy();
+	UpdateRenderPath();
+}
+
+string DollyCam::GetInterpolationMethod()
+{
+	if (interpStrategy)
+		return interpStrategy->GetName();
+	return "none";
+}
+
+
 
 shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy()
 {
@@ -166,8 +215,17 @@ shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy()
 	case 0:
 		return std::make_shared<LinearInterpStrategy>(LinearInterpStrategy(currentPath));
 		break;
+	case 1:
+		return std::make_shared<NBezierInterpStrategy>(NBezierInterpStrategy(currentPath));
+		break;
+	case 2:
+		return std::make_shared<CosineInterpStrategy>(CosineInterpStrategy(currentPath));
+		break;
+	case 3:
+		return std::make_shared<HermiteInterpStrategy>(HermiteInterpStrategy(currentPath));
+		break;
 	}
 
-	cvarManager->log("Interpstrategy not found, defaulting to linear interp");
+	cvarManager->log("Interpstrategy not found!!! Defaulting to linear interp.");
 	return std::make_shared<LinearInterpStrategy>(LinearInterpStrategy(currentPath));;
 }

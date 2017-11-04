@@ -30,6 +30,9 @@
     <ClInclude Include="models.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="serialization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dollycamplugin.cpp">
@@ -45,6 +48,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="models.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="serialization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

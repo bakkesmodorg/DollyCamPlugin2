@@ -116,6 +116,7 @@
     <ClInclude Include="gameapplier.h" />
     <ClInclude Include="interpstrategy.h" />
     <ClInclude Include="models.h" />
+    <ClInclude Include="serialization.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dollycam.cpp" />
@@ -123,6 +124,7 @@
     <ClCompile Include="gameapplier.cpp" />
     <ClCompile Include="interpstrategy.cpp" />
     <ClCompile Include="models.cpp" />
+    <ClCompile Include="serialization.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

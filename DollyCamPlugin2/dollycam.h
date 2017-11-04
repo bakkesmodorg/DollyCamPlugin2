@@ -31,8 +31,11 @@ public:
 	void Activate();
 	void Deactivate();
 	void Apply();
+	void Reset();
 	void SetRenderPath(bool render);
 	void Render(CanvasWrapper cw);
+	void RefreshInterpData();
+	string GetInterpolationMethod();
 	shared_ptr<InterpStrategy> CreateInterpStrategy();
 };
 

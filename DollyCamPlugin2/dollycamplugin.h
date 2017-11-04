@@ -13,6 +13,8 @@ public:
 	virtual void onUnload();
 	void onTick(std::string funcName);
 	void OnAllCommand(vector<string> params);
+	void OnCamCommand(vector<string> params);
 	void OnReplayCommand(vector<string> params);
 	void onRender(CanvasWrapper canvas);
+	void OnInterpModeChanged(string oldValue, CVarWrapper newCvar);
 };
