@@ -26,6 +26,7 @@ void DollyCamPlugin::onLoad()
 
 	cvarManager->registerCvar("dolly_interpmode", "0", "Used interp mode", true, true, 0, true, 2000).addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
 	cvarManager->registerCvar("dolly_render", "1", "Render the current camera path", true, true, 0, true, 1).bindTo(renderCameraPath);
+	cvarManager->registerCvar("dolly_render_frame", "1", "Render frame numbers on the path", true, true, 0, true, 1).addOnValueChanged(bind(&DollyCamPlugin::OnRenderFramesChanged, this, _1, _2));
 
 	cvarManager->registerNotifier("dolly_path_clear", bind(&DollyCamPlugin::OnAllCommand, this, _1));
 	cvarManager->registerNotifier("dolly_snapshot_take", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
@@ -38,11 +39,26 @@ void DollyCamPlugin::onLoad()
 	cvarManager->registerNotifier("dolly_cam_set_fov", bind(&DollyCamPlugin::OnCamCommand, this, _1));
 	cvarManager->registerNotifier("dolly_cam_set_frame", bind(&DollyCamPlugin::OnCamCommand, this, _1));
 
+	cvarManager->registerNotifier("dolly_snapshot_list", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
+	cvarManager->registerNotifier("dolly_snapshot_info", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
+	//cvarManager->registerNotifier("dolly_snapshot_set", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
+	cvarManager->registerNotifier("dolly_snapshot_override", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
+	cvarManager->registerNotifier("dolly_snapshot_delete", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
+
 	dollyCam->SetRenderPath(true);
 }
 
 void DollyCamPlugin::onUnload()
 {
+}
+
+void DollyCamPlugin::PrintSnapshotInfo(CameraSnapshot shot)
+{
+	cvarManager->log("Frame: " + to_string(shot.frame));
+	cvarManager->log("Time: " + to_string_with_precision(shot.timeStamp, 5));
+	cvarManager->log("FOV: " + to_string_with_precision(shot.FOV, 5));
+	cvarManager->log("Location " + vector_to_string(shot.location));
+	cvarManager->log("Rotation " + rotator_to_string(shot.rotation.ToRotator()));
 }
 
 
@@ -63,6 +79,8 @@ void DollyCamPlugin::OnAllCommand(vector<string> params)
 	}
 }
 
+
+
 void DollyCamPlugin::OnCamCommand(vector<string> params)
 {
 	if (!IsApplicable())
@@ -75,14 +93,8 @@ void DollyCamPlugin::OnCamCommand(vector<string> params)
 	CameraWrapper camera = gameWrapper->GetCamera();
 	if (command.compare("dolly_cam_show") == 0)
 	{
-		auto location = camera.GetLocation();
-		auto rotation = camera.GetRotation();
-		ReplayWrapper replay = gameWrapper->GetGameEventAsReplay();
-		cvarManager->log("Frame: " + to_string(replay.GetCurrentReplayFrame()));
-		cvarManager->log("Time: " + to_string_with_precision(replay.GetReplayTimeElapsed(), 5));
-		cvarManager->log("FOV: " + to_string_with_precision(camera.GetFOV(), 5));
-		cvarManager->log("Location " + vector_to_string(location));
-		cvarManager->log("Rotation " + rotator_to_string(rotation));
+		CameraSnapshot cameraInfo = dollyCam->TakeSnapshot(false);
+		this->PrintSnapshotInfo(cameraInfo);
 	} 
 	else if (command.compare("dolly_cam_set_location") == 0)
 	{
@@ -139,7 +151,7 @@ void DollyCamPlugin::OnReplayCommand(vector<string> params)
 	string command = params.at(0);
 	if (command.compare("dolly_snapshot_take") == 0)
 	{
-		CameraSnapshot snapshot = dollyCam->TakeSnapshot();
+		CameraSnapshot snapshot = dollyCam->TakeSnapshot(true);
 		if (snapshot.frame < 0)
 		{
 			cvarManager->log("Failed to create snapshot");
@@ -147,7 +159,7 @@ void DollyCamPlugin::OnReplayCommand(vector<string> params)
 		else
 		{
 			cvarManager->log("Saved snapshot #" + to_string(snapshot.frame));
-			cvarManager->executeCommand(false);
+			cvarManager->executeCommand("dolly_snapshot_info " + to_string(snapshot.frame), false);
 		}
 	}
 	else if (command.compare("dolly_deactivate") == 0)
@@ -161,6 +173,83 @@ void DollyCamPlugin::OnReplayCommand(vector<string> params)
 
 }
 
+void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
+{
+	if (!IsApplicable())
+	{
+		cvarManager->log("You cannot do that here!");
+		return;
+	}
+
+	string command = params.at(0);
+	if (command.compare("dolly_snapshot_list") == 0)
+	{
+		vector<int> frames = dollyCam->GetUsedFrames();
+		for (auto it = frames.begin(); it != frames.end(); it++)
+		{
+			CameraSnapshot snapshot = dollyCam->GetSnapshot(*it);
+			cvarManager->log("ID: " + to_string(snapshot.frame) + ", [" + to_string_with_precision(snapshot.timeStamp, 2) + "][" + to_string_with_precision(snapshot.FOV, 2) + "] (" + vector_to_string(snapshot.location) + ") (" + rotator_to_string(snapshot.rotation.ToRotator()) + " )");
+		}
+		cvarManager->log("Current path has " + to_string(frames.size()) + " snapshots.");
+	} 
+	else if (command.compare("dolly_snapshot_info") == 0)
+	{
+		if (params.size() < 2) {
+			cvarManager->log("Usage: " + params.at(0) + " id");
+			return;
+		}
+		int frame = get_safe_int(params.at(1));
+		if (!dollyCam->IsFrameUsed(frame)) {
+			cvarManager->log("This snapshot does not exist");
+		}
+		else 
+		{
+			CameraSnapshot snapshot = dollyCam->GetSnapshot(frame);
+			cvarManager->log("ID " + to_string(snapshot.frame) + ". FOV: " + to_string(snapshot.FOV) + ". Time: " + to_string_with_precision(snapshot.timeStamp, 3));
+			cvarManager->log("Location " + vector_to_string(snapshot.location));
+			cvarManager->log("Rotation " + rotator_to_string(snapshot.rotation.ToRotator()));
+			if (params.size() == 3) {
+				string action = params.at(2);
+				if (action.compare("set") == 0) {
+					CameraWrapper camera = gameWrapper->GetCamera();
+					camera.SetLocation(snapshot.location);
+					camera.SetRotation(snapshot.rotation.ToRotator());
+					camera.SetFOV(snapshot.FOV);
+				}
+			}
+		}
+	}
+	else if (command.compare("dolly_snapshot_set") == 0)
+	{
+
+	}
+	else if (command.compare("dolly_snapshot_override") == 0)
+	{
+		if (params.size() < 2) {
+			cvarManager->log("Usage: " + params.at(0) + " id");
+			return;
+		}
+
+		int frame = get_safe_int(params.at(1));
+		/*if (!dollyCam->IsFrameUsed(frame)) {
+			cvarManager->log("This snapshot does not exist");
+			return;
+		}*/
+		CameraSnapshot snapshot = dollyCam->GetSnapshot(false);
+		snapshot.frame = frame;
+		dollyCam->InsertSnapshot(snapshot);
+	}
+	else if (command.compare("dolly_snapshot_delete") == 0)
+	{
+		if (params.size() < 2) {
+			cvarManager->log("Usage: " + params.at(0) + " id");
+			return;
+		}
+		int id = get_safe_int(params.at(1));
+		dollyCam->DeleteFrame(id);
+	}
+}
+
 void DollyCamPlugin::onRender(CanvasWrapper canvas)
 {
 	if (!IsApplicable() || !*renderCameraPath)
@@ -172,4 +261,9 @@ void DollyCamPlugin::OnInterpModeChanged(string oldValue, CVarWrapper newCvar)
 {
 	dollyCam->RefreshInterpData();
 	cvarManager->log("Now using " + dollyCam->GetInterpolationMethod());
+}
+
+void DollyCamPlugin::OnRenderFramesChanged(string oldValue, CVarWrapper newCvar)
+{
+	dollyCam->SetRenderFrames(newCvar.getBoolValue());
 }

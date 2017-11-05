@@ -49,7 +49,7 @@ DollyCam::~DollyCam()
 {
 }
 
-CameraSnapshot DollyCam::TakeSnapshot()
+CameraSnapshot DollyCam::TakeSnapshot(bool saveToPath)
 {
 	CameraSnapshot save = { -1 };
 	if (!gameWrapper->IsInReplay())
@@ -59,7 +59,6 @@ CameraSnapshot DollyCam::TakeSnapshot()
 	CameraWrapper flyCam = gameWrapper->GetCamera();
 	if (sw.IsNull())
 		return save;
-
 	
 	save.timeStamp = sw.GetReplayTimeElapsed();
 	save.FOV = flyCam.GetFOV();
@@ -67,9 +66,10 @@ CameraSnapshot DollyCam::TakeSnapshot()
 	save.rotation = CustomRotator(flyCam.GetRotation());
 	save.frame = sw.GetCurrentReplayFrame();
 	
-	currentPath->insert(std::make_pair(save.frame, save));
-	interpStrategy = CreateInterpStrategy();
-	UpdateRenderPath();
+	if (saveToPath) {
+		this->InsertSnapshot(save);
+	}
+
 	return save;
 }
 
@@ -136,9 +136,54 @@ void DollyCam::Reset()
 	this->RefreshInterpData();
 }
 
+void DollyCam::InsertSnapshot(CameraSnapshot snapshot)
+{
+	this->currentPath->insert_or_assign(snapshot.frame, snapshot);
+	this->RefreshInterpData();
+}
+
+bool DollyCam::IsFrameUsed(int frame)
+{
+	return currentPath->find(frame) != currentPath->end();
+}
+
+CameraSnapshot DollyCam::GetSnapshot(int frame)
+{
+	CameraSnapshot snapshot = { -1 };
+	auto it = currentPath->find(frame);
+	if (it != currentPath->end())
+	{
+		snapshot = it->second;
+	}
+	return snapshot;
+}
+
+void DollyCam::DeleteFrame(int frame)
+{
+	auto it = currentPath->find(frame);
+	if (it != currentPath->end())
+		this->currentPath->erase(it);
+	this->RefreshInterpData();
+}
+
+vector<int> DollyCam::GetUsedFrames()
+{
+	vector<int> frames = vector<int>();
+	for (auto it = currentPath->begin(); it != currentPath->end(); it++)
+	{
+		frames.push_back(it->first);
+	}
+	return frames;
+}
+
 void DollyCam::SetRenderPath(bool render)
 {
 	renderPath = render;
+}
+
+void DollyCam::SetRenderFrames(bool _renderFrames)
+{
+	this->renderFrames = _renderFrames;
 }
 
 void DollyCam::Render(CanvasWrapper cw)
@@ -176,6 +221,11 @@ void DollyCam::Render(CanvasWrapper cw)
 			cw.DrawLine(prevLine, line);
 			cw.DrawLine(prevLine.minus({ 1,1 }), line.minus({ 1,1 })); //make lines thicker
 			cw.DrawLine(prevLine.minus({ -1,-1 }), line.minus({ -1,-1 }));
+			if (renderFrames) {
+				cw.SetColor(0, 0, 0, 255);
+				cw.SetPosition(line);
+				cw.DrawString(to_string(it->first));
+			}
 		}
 		
 		prevLine = line;
@@ -190,6 +240,8 @@ void DollyCam::Render(CanvasWrapper cw)
 			boxLoc.Y -= 5;
 			cw.SetPosition(boxLoc);
 			cw.FillBox({ 10, 10});
+			cw.SetColor(0, 0, 0, 255);
+			cw.DrawString(to_string(it->first));
 		}
 	}
 }

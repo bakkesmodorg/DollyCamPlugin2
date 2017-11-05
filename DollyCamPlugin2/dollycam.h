@@ -19,20 +19,27 @@ private:
 	std::shared_ptr<savetype> currentRenderPath;
 	bool isActive = false;
 	bool renderPath = false;
-
+	bool renderFrames = false;
 	void UpdateRenderPath();
+
 public:
 	DollyCam(std::shared_ptr<GameWrapper> _gameWrapper, std::shared_ptr<CVarManagerWrapper> _cvarManager, std::shared_ptr<IGameApplier> _gameApplier);
 	~DollyCam();
 
-	//Takes a snapshot of the current camera state and adds it to current path, returns true if taking snapshot was sucsessfull
-	CameraSnapshot TakeSnapshot();
+	//Takes a snapshot of the current camera state and adds it to current path, returns true if taking snapshot was successfull
+	CameraSnapshot TakeSnapshot(bool saveToPath);
 	bool IsActive();
 	void Activate();
 	void Deactivate();
 	void Apply();
 	void Reset();
+	void InsertSnapshot(CameraSnapshot snapshot);
+	bool IsFrameUsed(int frame);
+	CameraSnapshot GetSnapshot(int frame);
+	void DeleteFrame(int frame);
+	vector<int> GetUsedFrames();
 	void SetRenderPath(bool render);
+	void SetRenderFrames(bool renderFrames);
 	void Render(CanvasWrapper cw);
 	void RefreshInterpData();
 	string GetInterpolationMethod();

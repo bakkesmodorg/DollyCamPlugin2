@@ -12,10 +12,21 @@ private:
 public:
 	virtual void onLoad();
 	virtual void onUnload();
+
+	//Info/debug methods
+	void PrintSnapshotInfo(CameraSnapshot shot);
+
+	//Engine hooks
 	void onTick(std::string funcName);
+	void onRender(CanvasWrapper canvas);
+
+	//Console command handlers
 	void OnAllCommand(vector<string> params);
 	void OnCamCommand(vector<string> params);
 	void OnReplayCommand(vector<string> params);
-	void onRender(CanvasWrapper canvas);
+	void OnSnapshotCommand(vector<string> params);
+
+	//Cvar change listeners
 	void OnInterpModeChanged(string oldValue, CVarWrapper newCvar);
+	void OnRenderFramesChanged(string oldValue, CVarWrapper newCvar);
 };
