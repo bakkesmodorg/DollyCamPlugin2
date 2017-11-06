@@ -45,6 +45,8 @@ void DollyCamPlugin::onLoad()
 	cvarManager->registerNotifier("dolly_snapshot_override", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
 	cvarManager->registerNotifier("dolly_snapshot_delete", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
 
+	cvarManager->registerNotifier("dolly_bezier_weight", bind(&DollyCamPlugin::OnBezierCommand, this, _1));
+
 	dollyCam->SetRenderPath(true);
 }
 
@@ -188,7 +190,7 @@ void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
 		for (auto it = frames.begin(); it != frames.end(); it++)
 		{
 			CameraSnapshot snapshot = dollyCam->GetSnapshot(*it);
-			cvarManager->log("ID: " + to_string(snapshot.frame) + ", [" + to_string_with_precision(snapshot.timeStamp, 2) + "][" + to_string_with_precision(snapshot.FOV, 2) + "] (" + vector_to_string(snapshot.location) + ") (" + rotator_to_string(snapshot.rotation.ToRotator()) + " )");
+			cvarManager->log("ID: " + to_string(snapshot.frame) + ", [" + to_string_with_precision(snapshot.weight, 2) + "][" + to_string_with_precision(snapshot.timeStamp, 2) + "][" + to_string_with_precision(snapshot.FOV, 2) + "] (" + vector_to_string(snapshot.location) + ") (" + rotator_to_string(snapshot.rotation.ToRotator()) + " )");
 		}
 		cvarManager->log("Current path has " + to_string(frames.size()) + " snapshots.");
 	} 
@@ -205,7 +207,7 @@ void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
 		else 
 		{
 			CameraSnapshot snapshot = dollyCam->GetSnapshot(frame);
-			cvarManager->log("ID " + to_string(snapshot.frame) + ". FOV: " + to_string(snapshot.FOV) + ". Time: " + to_string_with_precision(snapshot.timeStamp, 3));
+			cvarManager->log("ID " + to_string(snapshot.frame) + ". FOV: " + to_string(snapshot.FOV) + ". Time: " + to_string_with_precision(snapshot.timeStamp, 3) + ". Weight: " + to_string_with_precision(snapshot.weight, 3));
 			cvarManager->log("Location " + vector_to_string(snapshot.location));
 			cvarManager->log("Rotation " + rotator_to_string(snapshot.rotation.ToRotator()));
 			if (params.size() == 3) {
@@ -235,7 +237,7 @@ void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
 			cvarManager->log("This snapshot does not exist");
 			return;
 		}*/
-		CameraSnapshot snapshot = dollyCam->GetSnapshot(false);
+		CameraSnapshot snapshot = dollyCam->TakeSnapshot(false);
 		snapshot.frame = frame;
 		dollyCam->InsertSnapshot(snapshot);
 	}
@@ -266,4 +268,36 @@ void DollyCamPlugin::OnInterpModeChanged(string oldValue, CVarWrapper newCvar)
 void DollyCamPlugin::OnRenderFramesChanged(string oldValue, CVarWrapper newCvar)
 {
 	dollyCam->SetRenderFrames(newCvar.getBoolValue());
+}
+
+void DollyCamPlugin::OnBezierCommand(vector<string> params)
+{
+	string command = params.at(0);
+	if (command.compare("dolly_bezier_weight") == 0)
+	{
+		if (params.size() < 2)
+		{
+			cvarManager->log("Usage: " + command + " id weight");
+			return;
+		}
+		int id = get_safe_int(params.at(1));
+		if (!dollyCam->IsFrameUsed(id))
+		{
+			cvarManager->log("Frame #" + to_string(id) + " does not have a snapshot attached");
+			return;
+		}
+
+		CameraSnapshot snapshot = dollyCam->GetSnapshot(id);
+		if (params.size() == 2)
+		{
+			cvarManager->log("Snapshot #" + to_string(snapshot.frame) + " weight: " + to_string(snapshot.weight));
+		}
+		else {
+			float weight = get_safe_float(params.at(2));
+			snapshot.weight = weight;
+			dollyCam->InsertSnapshot(snapshot);
+			cvarManager->log("Snapshot #" + to_string(snapshot.frame) + " saved with weight: " + to_string(snapshot.weight));
+		}
+	}
+
 }

@@ -13,9 +13,11 @@ struct NewPOV
 struct CameraSnapshot
 {
 	//int id; 
-	int frame; //Lets use frames as ID's
-	float timeStamp;
-	float FOV;
+	int frame = 0.f; //Lets use frames as ID's
+	float timeStamp = 0.f;
+	float FOV = 0.f;
 	Vector location;
 	CustomRotator rotation;
+
+	float weight = 1.f;
 };

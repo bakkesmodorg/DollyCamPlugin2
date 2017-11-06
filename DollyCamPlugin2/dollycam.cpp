@@ -9,23 +9,31 @@ void DollyCam::UpdateRenderPath()
 	auto strategy = CreateInterpStrategy();
 	auto firstFrame = currentPath->begin();
 	float beginTime = firstFrame->second.timeStamp;
+
 	int startFrame = firstFrame->first;
 	int endFrame = (--currentPath->end())->first;
 	
 	float replayTickRate = 1.f / 30.f;//Retrieve this from game later
 
 	int lastSyncedFrame = startFrame;
-
+	float timePerFrame = 1 / 30.f;
 	for (int i = startFrame; i <= endFrame; i++)
 	{
 		if (currentPath->find(i) != currentPath->end())
 		{
 			lastSyncedFrame = i;
-			beginTime = currentPath->find(i)->second.timeStamp;
+			auto currentSnapshot = currentPath->find(i);
+			beginTime = currentSnapshot->second.timeStamp;
+
+			auto nextSnapshot = currentPath->upper_bound(i);
+			timePerFrame = (nextSnapshot->second.timeStamp - beginTime) / (nextSnapshot->second.frame - currentSnapshot->second.frame);
 		}
+		
+
+
 		CameraSnapshot snapshot;
 		snapshot.frame = i;
-		snapshot.timeStamp = beginTime + (replayTickRate * (i - lastSyncedFrame));
+		snapshot.timeStamp = beginTime + (timePerFrame * (i - lastSyncedFrame));
 		NewPOV pov = strategy->GetPOV(snapshot.timeStamp, i);
 		snapshot.location = pov.location;
 		snapshot.rotation = pov.rotation;
@@ -51,7 +59,7 @@ DollyCam::~DollyCam()
 
 CameraSnapshot DollyCam::TakeSnapshot(bool saveToPath)
 {
-	CameraSnapshot save = { -1 };
+	CameraSnapshot save;
 	if (!gameWrapper->IsInReplay())
 		return save;
 
@@ -149,7 +157,7 @@ bool DollyCam::IsFrameUsed(int frame)
 
 CameraSnapshot DollyCam::GetSnapshot(int frame)
 {
-	CameraSnapshot snapshot = { -1 };
+	CameraSnapshot snapshot;
 	auto it = currentPath->find(frame);
 	if (it != currentPath->end())
 	{
@@ -241,7 +249,7 @@ void DollyCam::Render(CanvasWrapper cw)
 			cw.SetPosition(boxLoc);
 			cw.FillBox({ 10, 10});
 			cw.SetColor(0, 0, 0, 255);
-			cw.DrawString(to_string(it->first));
+			cw.DrawString(to_string(it->first) + " (w:" + to_string(it->second.weight) + ")");
 		}
 	}
 }
