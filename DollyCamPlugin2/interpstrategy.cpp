@@ -53,6 +53,7 @@ std::string LinearInterpStrategy::GetName()
 NBezierInterpStrategy::NBezierInterpStrategy(std::shared_ptr<savetype> _camPath)
 {
 	camPath = std::make_unique<savetype>(*_camPath);
+	rotInterp = std::make_unique<LinearInterpStrategy>(LinearInterpStrategy(_camPath));
 }
 
 uint64_t factorial(int n)
@@ -73,14 +74,17 @@ NewPOV NBezierInterpStrategy::GetPOV(float gameTime, int latestFrame)
 	Vector v;
 	float fov = 0;
 	int n = camPath->size();
-	int k = 0;
+ran-d	int k = 0;
 	for (savetype::const_iterator it = camPath->cbegin(); it != camPath->cend(); it++)
 	{
+		float weight = it->second.weight;
+
+
 		uint64_t fact = (factorial(n - 1) / ((factorial(k)*factorial((n - 1) - k)))); //Maximum of 19 points =\ 
 		float po = pow(1 - t, n - 1 - k) * pow(t, k);
 		float pofact = po * fact;
 
-		float weight = 1.f;
+//		float weight = it->second.weight;
 		//if (it != l2->cbegin() && it != --(l2->cend())) {
 		//	//weight = (++it)->first - (--it)->first;
 		//}
@@ -89,16 +93,21 @@ NewPOV NBezierInterpStrategy::GetPOV(float gameTime, int latestFrame)
 		Vector v2 = Vector(pofact) * it->second.location;
 		CustomRotator r2 = it->second.rotation * pofact;
 		
-		float fov2 = pofact * it->second.FOV;
+		float fov2 = pofact * (weight * it->second.FOV);
 
 		
 		v = v + v2;
-		rot += r2;
-		rot += r2;
+		rot = rot + r2;
+		//rot += r2;
 
 		fov = fov + fov2;
 		k++;
 	}
+	//CustomRotator newRot = rotInterp->GetPOV(gameTime, latestFrame).rotation;
+	
+	//rot.Pitch._value = newRot.Pitch._value;
+	//rot.Yaw._value = newRot.Yaw._value;
+	//rot.Roll._value = newRot.Roll._value;
 	return{ v, rot, fov };
 }
 
@@ -269,4 +278,78 @@ NewPOV HermiteInterpStrategy::GetPOV(float gameTime, int latestFrame)
 std::string HermiteInterpStrategy::GetName()
 {
 	return "hermite interpolation";
+}
+
+CatmullRomInterpStrategy::CatmullRomInterpStrategy(std::shared_ptr<savetype> _camPath)
+{
+	camPath = std::make_unique<savetype>(*_camPath);
+}
+
+float GetCatmullRomPosition(float t, float p0, float p1, float p2, float p3)
+{
+	//The coefficients of the cubic polynomial (except the 0.5f * which I added later for performance)
+	float a = 2.f * p1;
+	float b = p2 - p0;
+	float c = 2.f * p0 - 5.f * p1 + 4.f * p2 - p3;
+	float d = -p0 + 3.f * p1 - 3.f * p2 + p3;
+
+	//The cubic polynomial: a + b * t + c * t^2 + d * t^3
+	float pos = 0.5f * (a + (b * t) + (c * t * t) + (d * t * t * t));
+
+	return pos;
+}
+
+Vector catmullRom(float t, Vector p0, Vector p1, Vector p2, Vector p3)
+{
+	return Vector(GetCatmullRomPosition(t, p0.X, p1.X, p2.X, p3.X),
+		GetCatmullRomPosition(t, p0.Y, p1.Y, p2.Y, p3.Y),
+		GetCatmullRomPosition(t, p0.Z, p1.Z, p2.Z, p3.Z));
+	//Vector a = p1 * Vector(2.f);
+	//Vector b = p2 - p0;
+	//Vector c = p0  * Vector(2.f) - p1 * Vector(5.f) +  p2 * Vector(4.f) - p3;
+	//Vector p0neg = Vector(-p0.X, -p0.Y, -p0.Z);
+	//Vector d = p0neg + Vector(3.f) * p1 - Vector(3.f) * p2 + p3;
+
+	////The cubic polynomial: a + b * t + c * t^2 + d * t^3
+	//Vector pos = Vector(0.5f) * (a + (b * t) + (c * t * t) + (d * t * t * t));
+
+	//return pos;
+}
+
+NewPOV CatmullRomInterpStrategy::GetPOV(float gameTime, int latestFrame)
+{
+	if (camPath->size() < 4) //Need atleast 4 elements
+		return{ 0 };
+	//gameTime -= camPath->begin()->second.timeStamp;
+	auto startSnapshot = camPath->upper_bound(latestFrame);
+	int goBack = 2;
+
+	if (startSnapshot == camPath->end())
+		goBack = 4;
+	else if (startSnapshot == (--camPath->end()))
+		goBack = 3;
+
+	for (int i = 0; i < goBack && startSnapshot != camPath->begin(); i++) //Go to first snapshot needed for hermite
+	{
+		startSnapshot = std::prev(startSnapshot);
+	}
+
+	auto currentSnapshot = std::next(startSnapshot);
+	auto nextSnapshot = std::next(currentSnapshot);
+	auto nextNextSnapshot = std::next(nextSnapshot);
+
+	float totalDiff = nextNextSnapshot->second.timeStamp - startSnapshot->second.timeStamp;// nextNextSnapshot->second.timeStamp - startSnapshot->second.timeStamp;
+	float percElapsed = gameTime / totalDiff;
+
+	NewPOV newPov;
+	newPov.location = catmullRom(percElapsed, startSnapshot->second.location, currentSnapshot->second.location, nextSnapshot->second.location, nextNextSnapshot->second.location);
+	/*newPov.rotation = catmullRom(startSnapshot->second.rotation, currentSnapshot->second.rotation, nextSnapshot->second.rotation, nextNextSnapshot->second.rotation, percElapsed);
+	newPov.FOV = catmullRom(startSnapshot->second.FOV, currentSnapshot->second.FOV, nextSnapshot->second.FOV, nextNextSnapshot->second.FOV, percElapsed);*/
+	newPov.FOV = 90;
+	return newPov;
+}
+
+std::string CatmullRomInterpStrategy::GetName()
+{
+	return "Catmull-Rom interpolation";
 }

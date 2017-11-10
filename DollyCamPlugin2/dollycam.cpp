@@ -2,6 +2,7 @@
 #include "bakkesmod\wrappers\gamewrapper.h"
 #include "bakkesmod\wrappers\replaywrapper.h"
 #include "bakkesmod\wrappers\camerawrapper.h"
+#include "utils/parser.h"
 
 void DollyCam::UpdateRenderPath()
 {
@@ -16,7 +17,7 @@ void DollyCam::UpdateRenderPath()
 	float replayTickRate = 1.f / 30.f;//Retrieve this from game later
 
 	int lastSyncedFrame = startFrame;
-	float timePerFrame = 1 / 30.f;
+	float timePerFrame = replayTickRate;
 	for (int i = startFrame; i <= endFrame; i++)
 	{
 		if (currentPath->find(i) != currentPath->end())
@@ -24,9 +25,11 @@ void DollyCam::UpdateRenderPath()
 			lastSyncedFrame = i;
 			auto currentSnapshot = currentPath->find(i);
 			beginTime = currentSnapshot->second.timeStamp;
-
-			auto nextSnapshot = currentPath->upper_bound(i);
-			timePerFrame = (nextSnapshot->second.timeStamp - beginTime) / (nextSnapshot->second.frame - currentSnapshot->second.frame);
+			timePerFrame = replayTickRate;
+			//auto nextSnapshot = currentPath->upper_bound(i);
+			//timePerFrame = (nextSnapshot->second.timeStamp - beginTime) / (nextSnapshot->second.frame - currentSnapshot->second.frame);
+			//if (timePerFrame < .01f || timePerFrame > .08f) //outliers
+			//	timePerFrame = replayTickRate;
 		}
 		
 
@@ -205,7 +208,7 @@ void DollyCam::Render(CanvasWrapper cw)
 	Vector2 prevLine = cw.Project(currentRenderPath->begin()->second.location);
 	Vector2 canvasSize = cw.GetSize();
 
-	int colTest = 0;
+	int colTest = 255;
 	for (auto it = (++currentRenderPath->begin()); it != currentRenderPath->end(); ++it)
 	{
 		Vector2 line = cw.Project(it->second.location);
@@ -249,7 +252,7 @@ void DollyCam::Render(CanvasWrapper cw)
 			cw.SetPosition(boxLoc);
 			cw.FillBox({ 10, 10});
 			cw.SetColor(0, 0, 0, 255);
-			cw.DrawString(to_string(it->first) + " (w:" + to_string(it->second.weight) + ")");
+			cw.DrawString(to_string(it->first) + " (w:" + to_string_with_precision(it->second.weight, 2) + ")");
 		}
 	}
 }
@@ -285,6 +288,9 @@ shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy()
 		break;
 	case 3:
 		return std::make_shared<HermiteInterpStrategy>(HermiteInterpStrategy(currentPath));
+		break;
+	case 4:
+		return std::make_shared<CatmullRomInterpStrategy>(CatmullRomInterpStrategy(currentPath));
 		break;
 	}
 

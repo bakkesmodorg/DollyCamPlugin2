@@ -23,6 +23,8 @@ public:
 
 class NBezierInterpStrategy : public InterpStrategy
 {
+private:
+	std::unique_ptr<LinearInterpStrategy> rotInterp;
 public:
 	NBezierInterpStrategy(std::shared_ptr<savetype> _camPath);
 	virtual NewPOV GetPOV(float gameTime, int latestFrame);
@@ -41,6 +43,14 @@ class HermiteInterpStrategy : public InterpStrategy
 {
 public:
 	HermiteInterpStrategy(std::shared_ptr<savetype> _camPath);
+	virtual NewPOV GetPOV(float gameTime, int latestFrame);
+	virtual std::string GetName();
+};
+
+class CatmullRomInterpStrategy : public InterpStrategy
+{
+public:
+	CatmullRomInterpStrategy(std::shared_ptr<savetype> _camPath);
 	virtual NewPOV GetPOV(float gameTime, int latestFrame);
 	virtual std::string GetName();
 };
