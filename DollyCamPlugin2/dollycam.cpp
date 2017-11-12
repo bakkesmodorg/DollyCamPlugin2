@@ -16,7 +16,7 @@ void DollyCam::UpdateRenderPath()
 	int startFrame = firstFrame->first;
 	int endFrame = (--currentPath->end())->first;
 	
-	float replayTickRate = 1.f / 30.f;//Retrieve this from game later
+	float replayTickRate = 1.f / (float)gameWrapper->GetGameEventAsReplay().GetReplayFPS();
 
 	int lastSyncedFrame = startFrame;
 	float timePerFrame = replayTickRate;
