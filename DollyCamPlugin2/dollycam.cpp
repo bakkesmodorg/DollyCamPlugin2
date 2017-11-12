@@ -4,6 +4,8 @@
 #include "bakkesmod\wrappers\camerawrapper.h"
 #include "utils/parser.h"
 
+#include "interpstrategies\supportedstrategies.h"
+
 void DollyCam::UpdateRenderPath()
 {
 	currentRenderPath = make_shared<savetype>(savetype());
@@ -275,13 +277,14 @@ string DollyCam::GetInterpolationMethod()
 shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy()
 {
 	CVarWrapper interpMode = cvarManager->getCvar("dolly_interpmode");
+	int chaikinDegree = cvarManager->getCvar("dolly_chaikin_degree").getIntValue();
 	switch (interpMode.getIntValue())
 	{
 	case 0:
-		return std::make_shared<LinearInterpStrategy>(LinearInterpStrategy(currentPath));
+		return std::make_shared<LinearInterpStrategy>(LinearInterpStrategy(currentPath, chaikinDegree));
 		break;
 	case 1:
-		return std::make_shared<NBezierInterpStrategy>(NBezierInterpStrategy(currentPath));
+		return std::make_shared<NBezierInterpStrategy>(NBezierInterpStrategy(currentPath, chaikinDegree));
 		break;
 	case 2:
 		return std::make_shared<CosineInterpStrategy>(CosineInterpStrategy(currentPath));
@@ -295,5 +298,5 @@ shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy()
 	}
 
 	cvarManager->log("Interpstrategy not found!!! Defaulting to linear interp.");
-	return std::make_shared<LinearInterpStrategy>(LinearInterpStrategy(currentPath));;
+	return std::make_shared<LinearInterpStrategy>(LinearInterpStrategy(currentPath, chaikinDegree));
 }

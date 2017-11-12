@@ -29,6 +29,7 @@ public:
 	//Cvar change listeners
 	void OnInterpModeChanged(string oldValue, CVarWrapper newCvar);
 	void OnRenderFramesChanged(string oldValue, CVarWrapper newCvar);
+	void OnChaikinChanged(string oldValue, CVarWrapper newCvar);
 
 	//Interp config methods
 	void OnBezierCommand(vector<string> params);

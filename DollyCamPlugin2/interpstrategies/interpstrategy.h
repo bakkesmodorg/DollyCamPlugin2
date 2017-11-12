@@ -1,5 +1,5 @@
 #pragma once
-#include "models.h"
+#include "../models.h"
 #include <memory>
 #include <map>
 #include <string>
@@ -7,29 +7,16 @@ class InterpStrategy
 {
 protected:
 	std::unique_ptr<savetype> camPath;
+	void setCamPath(std::shared_ptr<savetype> path, int chaikinAmount);
 public:
 
 	virtual NewPOV GetPOV(float gameTime, int latestFrame) = 0;
 	virtual std::string GetName() = 0;
 };
 
-class LinearInterpStrategy : public InterpStrategy
-{
-public:
-	LinearInterpStrategy(std::shared_ptr<savetype> _camPath);
-	virtual NewPOV GetPOV(float gameTime, int latestFrame);
-	virtual std::string GetName();
-};
 
-class NBezierInterpStrategy : public InterpStrategy
-{
-private:
-	std::unique_ptr<LinearInterpStrategy> rotInterp;
-public:
-	NBezierInterpStrategy(std::shared_ptr<savetype> _camPath);
-	virtual NewPOV GetPOV(float gameTime, int latestFrame);
-	virtual std::string GetName();
-};
+
+
 
 class CosineInterpStrategy : public InterpStrategy
 {

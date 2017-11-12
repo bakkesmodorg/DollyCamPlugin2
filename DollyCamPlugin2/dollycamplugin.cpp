@@ -46,6 +46,7 @@ void DollyCamPlugin::onLoad()
 	cvarManager->registerNotifier("dolly_snapshot_delete", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
 
 	cvarManager->registerNotifier("dolly_bezier_weight", bind(&DollyCamPlugin::OnBezierCommand, this, _1));
+	cvarManager->registerCvar("dolly_chaikin_degree", "0", "Amount of times to apply chaikin to the spline", true, true, 0, true, 20).addOnValueChanged(bind(&DollyCamPlugin::OnChaikinChanged, this, _1, _2));;
 
 	dollyCam->SetRenderPath(true);
 }
@@ -268,6 +269,11 @@ void DollyCamPlugin::OnInterpModeChanged(string oldValue, CVarWrapper newCvar)
 void DollyCamPlugin::OnRenderFramesChanged(string oldValue, CVarWrapper newCvar)
 {
 	dollyCam->SetRenderFrames(newCvar.getBoolValue());
+}
+
+void DollyCamPlugin::OnChaikinChanged(string oldValue, CVarWrapper newCvar)
+{
+	dollyCam->RefreshInterpData();
 }
 
 void DollyCamPlugin::OnBezierCommand(vector<string> params)

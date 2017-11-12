@@ -5,7 +5,7 @@
 #include "bakkesmod\plugin\bakkesmodplugin.h"
 #include "gameapplier.h"
 #include "models.h"
-#include "interpstrategy.h"
+#include "interpstrategies/interpstrategy.h"
 
 class DollyCam
 {

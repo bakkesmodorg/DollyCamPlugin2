@@ -24,13 +24,22 @@
     <ClInclude Include="gameapplier.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="interpstrategy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="models.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="serialization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="interpstrategies\interpstrategy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="interpstrategies\linearinterp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="interpstrategies\nbezierinterp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="interpstrategies\supportedstrategies.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -44,13 +53,19 @@
     <ClCompile Include="gameapplier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="interpstrategy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="models.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="serialization.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="interpstrategies\interpstrategy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="interpstrategies\linearinterp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="interpstrategies\nbezierinterp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

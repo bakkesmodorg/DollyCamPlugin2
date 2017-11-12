@@ -114,16 +114,21 @@
     <ClInclude Include="dollycam.h" />
     <ClInclude Include="dollycamplugin.h" />
     <ClInclude Include="gameapplier.h" />
-    <ClInclude Include="interpstrategy.h" />
+    <ClInclude Include="interpstrategies\interpstrategy.h" />
+    <ClInclude Include="interpstrategies\linearinterp.h" />
+    <ClInclude Include="interpstrategies\supportedstrategies.h" />
     <ClInclude Include="models.h" />
+    <ClInclude Include="interpstrategies\nbezierinterp.h" />
     <ClInclude Include="serialization.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dollycam.cpp" />
     <ClCompile Include="dollycamplugin.cpp" />
     <ClCompile Include="gameapplier.cpp" />
-    <ClCompile Include="interpstrategy.cpp" />
+    <ClCompile Include="interpstrategies\interpstrategy.cpp" />
+    <ClCompile Include="interpstrategies\linearinterp.cpp" />
     <ClCompile Include="models.cpp" />
+    <ClCompile Include="interpstrategies\nbezierinterp.cpp" />
     <ClCompile Include="serialization.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

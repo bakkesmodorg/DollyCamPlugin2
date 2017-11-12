@@ -2,133 +2,6 @@
 
 #define M_PI           3.14159265358979323846
 
-LinearInterpStrategy::LinearInterpStrategy(std::shared_ptr<savetype> _camPath)
-{
-	camPath = std::make_unique<savetype>(*_camPath); //Copy campath
-}
-
-NewPOV LinearInterpStrategy::GetPOV(float gameTime, int latestFrame)
-{
-	auto nextSnapshot = camPath->upper_bound(latestFrame);
-	auto currentSnapshot = std::prev(nextSnapshot);
-	 // std::next(currentSnapshot);
-	if (currentSnapshot == camPath->end() || nextSnapshot == camPath->end() || camPath->begin()->first > latestFrame) //We're at the end of the playback
-		return{ Vector(0), CustomRotator(0,0,0), 0 };
-	
-
-	float frameDiff = nextSnapshot->second.timeStamp - currentSnapshot->second.timeStamp;
-	float timeElapsed = gameTime - currentSnapshot->second.timeStamp;
-	float percElapsed = timeElapsed / frameDiff;
-
-	CustomRotator snapR = CustomRotator(frameDiff, frameDiff, frameDiff);
-	Vector snap = Vector(frameDiff);
-
-	NewPOV pov; //((currentSnapshot->second.rotation.diffTo(nextSnapshot->second.rotation))
-	pov.location = currentSnapshot->second.location + (((nextSnapshot->second.location - currentSnapshot->second.location) * timeElapsed)/snap);
-
-	CustomRotator dif = (currentSnapshot->second.rotation.diffTo(nextSnapshot->second.rotation));
-	CustomRotator dif2 = dif * percElapsed;
-	CustomRotator rot2 = currentSnapshot->second.rotation + dif2;
-	pov.rotation = rot2;
-	//FiniteElement<float> pitchDif = (nextSnapshot->second.rotation.Pitch - currentSnapshot->second.rotation.Pitch);
-	//FiniteElement<float> pitchDif2 = (pitchDif * percElapsed);
-	//pov.rotation.Pitch = currentSnapshot->second.rotation.Pitch + pitchDif2;
-
-
-
-	//pov.rotation.Yaw = currentSnapshot->second.rotation.Yaw + ((nextSnapshot->second.rotation.Yaw - currentSnapshot->second.rotation.Yaw) * percElapsed);
-	//pov.rotation.Roll = currentSnapshot->second.rotation.Roll + ((nextSnapshot->second.rotation.Roll - currentSnapshot->second.rotation.Roll) * percElapsed);
-	//
-
-	pov.FOV = currentSnapshot->second.FOV + (((nextSnapshot->second.FOV - currentSnapshot->second.FOV) * timeElapsed) / frameDiff);
-	
-	return pov;
-}
-
-std::string LinearInterpStrategy::GetName()
-{
-	return "linear interpolation";
-}
-
-NBezierInterpStrategy::NBezierInterpStrategy(std::shared_ptr<savetype> _camPath)
-{
-	camPath = std::make_unique<savetype>(*_camPath);
-	rotInterp = std::make_unique<LinearInterpStrategy>(LinearInterpStrategy(_camPath));
-}
-
-uint64_t factorial(int n)
-{
-	return (n == 1 || n == 0) ? 1 : factorial(n - 1) * n;
-}
-
-NewPOV NBezierInterpStrategy::GetPOV(float gameTime, int latestFrame)
-{
-	auto startSnapshot = camPath->begin();
-	auto endSnapshot = (--camPath->end());
-
-	float totalTime = endSnapshot->second.timeStamp - startSnapshot->second.timeStamp;
-	gameTime -= startSnapshot->second.timeStamp;
-	float t = gameTime / totalTime;
-
-	CustomRotator rot;
-	Vector v;
-	float fov = 0;
-	int n = camPath->size();
-	int k = 0;
-	Rotator lastRotator = camPath->begin()->second.rotation.ToRotator();
-	Rotator addedRotator = { -16364 + 16340, -32768 + 32764, -32768 + 32764 };
-	for (savetype::iterator it = camPath->begin(); it != camPath->end(); it++)
-	{
-		float weight = it->second.weight;
-
-
-		uint64_t fact = (factorial(n - 1) / ((factorial(k)*factorial((n - 1) - k)))); //Maximum of 19 points =\  
-		float po = pow(1 - t, n - 1 - k) * pow(t, k);
-		float pofact = po * fact;
-
-//		float weight = it->second.weight;
-		//if (it != l2->cbegin() && it != --(l2->cend())) {
-		//	//weight = (++it)->first - (--it)->first;
-		//}
-		//pofact *= weight;
-
-		Vector v2 = Vector(pofact) * it->second.location;
-		
-		
-		float fov2 = pofact * (weight * it->second.FOV);
-		Rotator usedRotator;
-		if (it != camPath->begin()) {
-			Rotator rotDiff = CustomRotator(lastRotator).diffTo(it->second.rotation).ToRotator();
-			usedRotator = lastRotator + rotDiff;
-		}
-		else
-		{
-			usedRotator = it->second.rotation.ToRotator();
-		}
-		Rotator r2 = { usedRotator.Pitch * pofact, usedRotator.Yaw * pofact, usedRotator.Roll * pofact };
-		lastRotator = usedRotator;
-		v = v + v2;
-		rot.Pitch += r2.Pitch;
-		rot.Yaw += r2.Yaw;
-		rot.Roll += r2.Roll;
-		//rot += r2;
-
-		fov = fov + fov2;
-		k++;
-	}
-	//CustomRotator newRot = rotInterp->GetPOV(gameTime, latestFrame).rotation;
-	
-	//rot.Pitch._value = newRot.Pitch._value;
-	//rot.Yaw._value = newRot.Yaw._value;
-	//rot.Roll._value = newRot.Roll._value;
-	return{ v, rot, fov };
-}
-
-std::string NBezierInterpStrategy::GetName()
-{
-	return "nth bezier interpolation";
-}
-
 CosineInterpStrategy::CosineInterpStrategy(std::shared_ptr<savetype> _camPath)
 {
 	camPath = std::make_unique<savetype>(*_camPath);
@@ -365,4 +238,38 @@ NewPOV CatmullRomInterpStrategy::GetPOV(float gameTime, int latestFrame)
 std::string CatmullRomInterpStrategy::GetName()
 {
 	return "Catmull-Rom interpolation";
+}
+
+void InterpStrategy::setCamPath(std::shared_ptr<savetype> _camPath, int chaikinAmount)
+{
+	camPath = std::make_unique<savetype>(*_camPath);
+	
+	for (int i = 0; i < chaikinAmount; i++) {
+		savetype inbetweenPath = savetype();
+		for (auto it = camPath->begin(); it != (--camPath->end()); it++)
+		{
+			CameraSnapshot current = it->second;
+			CameraSnapshot next = std::next(it)->second;
+
+			CameraSnapshot p25;
+			p25.frame = current.frame * .75f + next.frame * .25f;
+			p25.FOV = current.FOV * .75f + next.FOV * .25f;
+			p25.location = current.location * .75f + next.location * .25f;
+			p25.rotation = current.rotation * .75f + next.rotation * .25f;
+			p25.timeStamp = current.timeStamp * .75f + next.timeStamp * .25f;
+			p25.weight = current.weight * .75f + next.weight * .25f;
+
+			CameraSnapshot p75;
+			p75.frame = current.frame * .25f + next.frame * .75f;
+			p75.FOV = current.FOV * .25f + next.FOV * .75f;
+			p75.location = current.location * .25f + next.location * .75f;
+			p75.rotation = current.rotation * .25f + next.rotation * .75f;
+			p75.timeStamp = current.timeStamp * .25f + next.timeStamp * .75f;
+			p75.weight = current.weight * .25f + next.weight * .75f;
+
+			inbetweenPath.insert(std::make_pair(p25.frame, p25));
+			inbetweenPath.insert(std::make_pair(p75.frame, p75));
+		}
+		camPath->insert(inbetweenPath.begin(), inbetweenPath.end());
+	}
 }
