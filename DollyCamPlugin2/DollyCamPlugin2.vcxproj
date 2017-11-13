@@ -111,6 +111,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="interpstrategies\catmullrominterp.h" />
     <ClInclude Include="dollycam.h" />
     <ClInclude Include="dollycamplugin.h" />
     <ClInclude Include="gameapplier.h" />
@@ -122,6 +123,7 @@
     <ClInclude Include="serialization.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="interpstrategies\catmullrominterp.cpp" />
     <ClCompile Include="dollycam.cpp" />
     <ClCompile Include="dollycamplugin.cpp" />
     <ClCompile Include="gameapplier.cpp" />

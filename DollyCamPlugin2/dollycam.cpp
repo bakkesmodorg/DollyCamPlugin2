@@ -123,7 +123,7 @@ void DollyCam::Apply()
 	int currentFrame = sw.GetCurrentReplayFrame();
 	if (currentFrame < currentPath->begin()->first || currentFrame > (--currentPath->end())->first)
 		return;
-	cvarManager->log("Frame: " + to_string(currentFrame) + ". Replay time: " + to_string(sw.GetReplayTimeElapsed()));
+	//cvarManager->log("Frame: " + to_string(currentFrame) + ". Replay time: " + to_string(sw.GetReplayTimeElapsed()));
 	if (currentFrame == currentPath->begin()->first)
 	{
 		if (isFirst) {
@@ -293,7 +293,7 @@ shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy()
 		return std::make_shared<HermiteInterpStrategy>(HermiteInterpStrategy(currentPath));
 		break;
 	case 4:
-		return std::make_shared<CatmullRomInterpStrategy>(CatmullRomInterpStrategy(currentPath));
+		return std::make_shared<CatmullRomInterpStrategy>(CatmullRomInterpStrategy(currentPath, chaikinDegree));
 		break;
 	}
 

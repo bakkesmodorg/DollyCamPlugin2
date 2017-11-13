@@ -34,10 +34,3 @@ public:
 	virtual std::string GetName();
 };
 
-class CatmullRomInterpStrategy : public InterpStrategy
-{
-public:
-	CatmullRomInterpStrategy(std::shared_ptr<savetype> _camPath);
-	virtual NewPOV GetPOV(float gameTime, int latestFrame);
-	virtual std::string GetName();
-};
