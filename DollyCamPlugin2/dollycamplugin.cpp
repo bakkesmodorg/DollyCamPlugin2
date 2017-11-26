@@ -25,6 +25,11 @@ void DollyCamPlugin::onLoad()
 	gameWrapper->RegisterDrawable(bind(&DollyCamPlugin::onRender, this, _1));
 
 	cvarManager->registerCvar("dolly_interpmode", "0", "Used interp mode", true, true, 0, true, 2000).addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
+	
+	cvarManager->registerCvar("dolly_interpmode_location", "0", "Used interp mode for location", true, true, 0, true, 2000).addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
+	cvarManager->registerCvar("dolly_interpmode_rotation", "0", "Used interp mode for rotation", true, true, 0, true, 2000).addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
+
+	
 	cvarManager->registerCvar("dolly_render", "1", "Render the current camera path", true, true, 0, true, 1).bindTo(renderCameraPath);
 	cvarManager->registerCvar("dolly_render_frame", "1", "Render frame numbers on the path", true, true, 0, true, 1).addOnValueChanged(bind(&DollyCamPlugin::OnRenderFramesChanged, this, _1, _2));
 
@@ -224,6 +229,11 @@ void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
 	}
 	else if (command.compare("dolly_snapshot_set") == 0)
 	{
+		if (params.size() < 2) {
+			cvarManager->log("Usage: " + params.at(0) + " id");
+			return;
+		}
+		cvarManager->executeCommand("dolly_snapshot_info " + params.at(1) + " set", false);
 
 	}
 	else if (command.compare("dolly_snapshot_override") == 0)
@@ -262,8 +272,22 @@ void DollyCamPlugin::onRender(CanvasWrapper canvas)
 
 void DollyCamPlugin::OnInterpModeChanged(string oldValue, CVarWrapper newCvar)
 {
-	dollyCam->RefreshInterpData();
-	cvarManager->log("Now using " + dollyCam->GetInterpolationMethod());
+	string cvarName = newCvar.getCVarName();
+	if (cvarName.compare("dolly_interpmode") == 0)
+	{
+		cvarManager->executeCommand("dolly_interpmode_location " + newCvar.getStringValue(), false);
+		cvarManager->executeCommand("dolly_interpmode_rotation " + newCvar.getStringValue(), false);
+	}
+	else if(cvarName.compare("dolly_interpmode_location") == 0)
+	{
+		dollyCam->RefreshInterpData();
+		cvarManager->log("Now using " + dollyCam->GetInterpolationMethod(true) + " for camera location.");
+	}
+	else if(cvarName.compare("dolly_interpmode_rotation") == 0)
+	{
+		dollyCam->RefreshInterpDataRotation();
+		cvarManager->log("Now using " + dollyCam->GetInterpolationMethod(false) + " for camera rotation.");
+	}
 }
 
 void DollyCamPlugin::OnRenderFramesChanged(string oldValue, CVarWrapper newCvar)

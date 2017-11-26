@@ -14,14 +14,16 @@ private:
 	std::shared_ptr<GameWrapper> gameWrapper;
 	std::shared_ptr<CVarManagerWrapper> cvarManager;
 	std::shared_ptr<IGameApplier> gameApplier;
-	std::shared_ptr<InterpStrategy> interpStrategy;
+	std::shared_ptr<InterpStrategy> locationInterpStrategy;
+	std::shared_ptr<InterpStrategy> rotationInterpStrategy;
 
 	std::shared_ptr<savetype> currentRenderPath;
+	bool usesSameInterp = false;
 	bool isActive = false;
 	bool renderPath = false;
 	bool renderFrames = false;
 	void UpdateRenderPath();
-
+	void CheckIfSameInterp();
 public:
 	DollyCam(std::shared_ptr<GameWrapper> _gameWrapper, std::shared_ptr<CVarManagerWrapper> _cvarManager, std::shared_ptr<IGameApplier> _gameApplier);
 	~DollyCam();
@@ -42,7 +44,8 @@ public:
 	void SetRenderFrames(bool renderFrames);
 	void Render(CanvasWrapper cw);
 	void RefreshInterpData();
-	string GetInterpolationMethod();
-	shared_ptr<InterpStrategy> CreateInterpStrategy();
+	void RefreshInterpDataRotation();
+	string GetInterpolationMethod(bool locationInterp);
+	shared_ptr<InterpStrategy> CreateInterpStrategy(int interpStrategy);
 };
 

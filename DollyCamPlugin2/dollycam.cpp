@@ -9,7 +9,8 @@
 void DollyCam::UpdateRenderPath()
 {
 	currentRenderPath = make_shared<savetype>(savetype());
-	auto strategy = CreateInterpStrategy();
+	CVarWrapper interpMode = cvarManager->getCvar("dolly_interpmode_location");
+	auto locationRenderStrategy = CreateInterpStrategy(interpMode.getIntValue());
 	auto firstFrame = currentPath->begin();
 	float beginTime = firstFrame->second.timeStamp;
 
@@ -39,7 +40,7 @@ void DollyCam::UpdateRenderPath()
 		CameraSnapshot snapshot;
 		snapshot.frame = i;
 		snapshot.timeStamp = beginTime + (timePerFrame * (i - lastSyncedFrame));
-		NewPOV pov = strategy->GetPOV(snapshot.timeStamp, i);
+		NewPOV pov = locationRenderStrategy->GetPOV(snapshot.timeStamp, i);
 		snapshot.location = pov.location;
 		snapshot.rotation = pov.rotation;
 		snapshot.FOV = pov.FOV;
@@ -48,6 +49,11 @@ void DollyCam::UpdateRenderPath()
 			currentRenderPath->insert(make_pair(i, snapshot));
 
 	}
+}
+
+void DollyCam::CheckIfSameInterp()
+{
+	usesSameInterp = cvarManager->getCvar("dolly_interpmode_location").getIntValue() == cvarManager->getCvar("dolly_interpmode_rotation").getIntValue();
 }
 
 DollyCam::DollyCam(std::shared_ptr<GameWrapper> _gameWrapper, std::shared_ptr<CVarManagerWrapper> _cvarManager, std::shared_ptr<IGameApplier> _gameApplier)
@@ -97,8 +103,8 @@ void DollyCam::Activate()
 		return;
 
 	isActive = true;
-
-	interpStrategy = CreateInterpStrategy();
+	CVarWrapper interpMode = cvarManager->getCvar("dolly_interpmode_location");
+	locationInterpStrategy = CreateInterpStrategy(interpMode.getIntValue());
 	cvarManager->log("Dollycam activated");
 }
 
@@ -135,7 +141,13 @@ void DollyCam::Apply()
 		isFirst = true;
 	}
 
-	NewPOV pov = interpStrategy->GetPOV(sw.GetSecondsElapsed() - diff + currentPath->begin()->second.timeStamp, sw.GetCurrentReplayFrame());
+	NewPOV pov = locationInterpStrategy->GetPOV(sw.GetSecondsElapsed() - diff + currentPath->begin()->second.timeStamp, sw.GetCurrentReplayFrame());
+	if (!usesSameInterp)
+	{
+		NewPOV secondaryPov = rotationInterpStrategy->GetPOV(sw.GetSecondsElapsed() - diff + currentPath->begin()->second.timeStamp, sw.GetCurrentReplayFrame());
+		pov.rotation = secondaryPov.rotation;
+		pov.FOV = secondaryPov.FOV;
+	}
 	if (pov.FOV < 1) { //Invalid camerastate
 		return;
 	}
@@ -147,12 +159,14 @@ void DollyCam::Reset()
 {
 	this->currentPath->clear();
 	this->RefreshInterpData();
+	this->RefreshInterpDataRotation();
 }
 
 void DollyCam::InsertSnapshot(CameraSnapshot snapshot)
 {
 	this->currentPath->insert_or_assign(snapshot.frame, snapshot);
 	this->RefreshInterpData();
+	this->RefreshInterpDataRotation();
 }
 
 bool DollyCam::IsFrameUsed(int frame)
@@ -177,6 +191,7 @@ void DollyCam::DeleteFrame(int frame)
 	if (it != currentPath->end())
 		this->currentPath->erase(it);
 	this->RefreshInterpData();
+	this->RefreshInterpDataRotation();
 }
 
 vector<int> DollyCam::GetUsedFrames()
@@ -261,24 +276,39 @@ void DollyCam::Render(CanvasWrapper cw)
 
 void DollyCam::RefreshInterpData()
 {
-	interpStrategy = CreateInterpStrategy();
+	CVarWrapper interpMode = cvarManager->getCvar("dolly_interpmode_location");
+	locationInterpStrategy = CreateInterpStrategy(interpMode.getIntValue());
 	UpdateRenderPath();
+	CheckIfSameInterp();
 }
 
-string DollyCam::GetInterpolationMethod()
+void DollyCam::RefreshInterpDataRotation()
 {
-	if (interpStrategy)
-		return interpStrategy->GetName();
+	CVarWrapper interpMode = cvarManager->getCvar("dolly_interpmode_rotation");
+	rotationInterpStrategy = CreateInterpStrategy(interpMode.getIntValue());
+	if (locationInterpStrategy->GetName().compare((rotationInterpStrategy)->GetName()) == 0)
+	{
+		rotationInterpStrategy = locationInterpStrategy;
+	}
+	CheckIfSameInterp();
+}
+
+string DollyCam::GetInterpolationMethod(bool locationInterp)
+{
+	if (locationInterp && locationInterpStrategy)
+		return locationInterpStrategy->GetName();
+	else if (rotationInterpStrategy)
+		return rotationInterpStrategy->GetName();
 	return "none";
 }
 
 
 
-shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy()
+shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy(int interpStrategy)
 {
-	CVarWrapper interpMode = cvarManager->getCvar("dolly_interpmode");
+	
 	int chaikinDegree = cvarManager->getCvar("dolly_chaikin_degree").getIntValue();
-	switch (interpMode.getIntValue())
+	switch (interpStrategy)
 	{
 	case 0:
 		return std::make_shared<LinearInterpStrategy>(LinearInterpStrategy(currentPath, chaikinDegree));
