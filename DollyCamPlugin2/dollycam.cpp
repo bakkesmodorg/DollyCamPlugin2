@@ -6,6 +6,8 @@
 
 #include "interpstrategies\supportedstrategies.h"
 #include "bakkesmod/wrappers/ReplayWrapper.h"
+#include "serialization.h"
+
 
 void DollyCam::UpdateRenderPath()
 {
@@ -332,4 +334,37 @@ shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy(int interpStrategy)
 
 	cvarManager->log("Interpstrategy not found!!! Defaulting to linear interp.");
 	return std::make_shared<LinearInterpStrategy>(LinearInterpStrategy(currentPath, chaikinDegree));
+}
+
+void DollyCam::SaveToFile(string filename)
+{
+	std::map<string, CameraSnapshot> pathCopy;
+	for (auto &i : *currentPath)
+	{
+		pathCopy.insert_or_assign(to_string(i.first), i.second);
+	}
+	json j = pathCopy;
+	ofstream myfile;
+	myfile.open(filename);
+	myfile << j.dump(4);
+	myfile.close();
+}
+
+void DollyCam::LoadFromFile(string filename)
+{
+	std::ifstream i(filename);
+	json j;
+	i >> j;
+	currentPath->clear();
+	auto v8 = j.get<std::map<string, CameraSnapshot>>();
+	for (auto &i : v8)
+	{
+		string first = i.first;
+		int intVal = get_safe_int(first);
+		CameraSnapshot value = i.second;
+		currentPath->insert_or_assign(intVal, value);
+	}
+
+	this->RefreshInterpData();
+	this->RefreshInterpDataRotation();
 }

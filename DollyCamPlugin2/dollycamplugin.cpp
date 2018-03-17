@@ -5,6 +5,7 @@
 
 #include "utils\parser.h"
 #include "serialization.h"
+#include "utils/io.h"
 
 using namespace std::placeholders;
 
@@ -37,7 +38,10 @@ void DollyCamPlugin::onLoad()
 	cvarManager->registerNotifier("dolly_snapshot_take", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
 	cvarManager->registerNotifier("dolly_activate", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
 	cvarManager->registerNotifier("dolly_deactivate", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
-	
+
+	cvarManager->registerNotifier("dolly_path_save", bind(&DollyCamPlugin::OnAllCommand, this, _1));
+	cvarManager->registerNotifier("dolly_path_load", bind(&DollyCamPlugin::OnAllCommand, this, _1));
+
 	cvarManager->registerNotifier("dolly_cam_show", bind(&DollyCamPlugin::OnCamCommand, this, _1));
 	cvarManager->registerNotifier("dolly_cam_set_location", bind(&DollyCamPlugin::OnCamCommand, this, _1));
 	cvarManager->registerNotifier("dolly_cam_set_rotation", bind(&DollyCamPlugin::OnCamCommand, this, _1));
@@ -49,6 +53,8 @@ void DollyCamPlugin::onLoad()
 	//cvarManager->registerNotifier("dolly_snapshot_set", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
 	cvarManager->registerNotifier("dolly_snapshot_override", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
 	cvarManager->registerNotifier("dolly_snapshot_delete", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
+
+
 
 	cvarManager->registerNotifier("dolly_bezier_weight", bind(&DollyCamPlugin::OnBezierCommand, this, _1));
 	cvarManager->registerCvar("dolly_chaikin_degree", "0", "Amount of times to apply chaikin to the spline", true, true, 0, true, 20).addOnValueChanged(bind(&DollyCamPlugin::OnChaikinChanged, this, _1, _2));;
@@ -84,6 +90,32 @@ void DollyCamPlugin::OnAllCommand(vector<string> params)
 	if (command.compare("dolly_path_clear") == 0)
 	{
 		dollyCam->Reset();
+	}
+	
+	if (command.compare("dolly_path_save") == 0)
+	{
+		if (params.size() < 2)
+		{
+			cvarManager->log("Usage: " + params.at(0) + " filename");
+			return;
+		}
+		string filename = params.at(1);
+		dollyCam->SaveToFile(filename);
+	} 
+	else if (command.compare("dolly_path_load") == 0)
+	{
+		if (params.size() < 2)
+		{
+			cvarManager->log("Usage: " + params.at(0) + " filename");
+			return;
+		}
+		string filename = params.at(1);
+		if (!file_exists(filename))
+		{
+			cvarManager->log("File does not exist!");
+			return;
+		}
+		dollyCam->LoadFromFile(filename);
 	}
 }
 
@@ -121,9 +153,9 @@ void DollyCamPlugin::OnCamCommand(vector<string> params)
 			cvarManager->log("Usage: " + params.at(0) + " pitch yaw roll");
 			return;
 		}
-		float pitch = get_safe_float(params.at(1));
-		float yaw = get_safe_float(params.at(2));
-		float roll = get_safe_float(params.at(3));
+		int pitch = get_safe_float(params.at(1));
+		int yaw = get_safe_float(params.at(2));
+		int roll = get_safe_float(params.at(3));
 		camera.SetRotation({ pitch, yaw, roll });
 	}
 	else if (command.compare("dolly_cam_set_frame") == 0)

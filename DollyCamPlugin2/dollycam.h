@@ -47,5 +47,7 @@ public:
 	void RefreshInterpDataRotation();
 	string GetInterpolationMethod(bool locationInterp);
 	shared_ptr<InterpStrategy> CreateInterpStrategy(int interpStrategy);
+	void SaveToFile(string filename);
+	void LoadFromFile(string filename);
 };
 
