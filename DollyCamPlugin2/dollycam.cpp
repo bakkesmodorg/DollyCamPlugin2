@@ -1,13 +1,16 @@
 #include "dollycam.h"
 #include "bakkesmod\wrappers\gamewrapper.h"
 #include "bakkesmod\wrappers\replaywrapper.h"
-#include "bakkesmod\wrappers\camerawrapper.h"
+#include "bakkesmod\wrappers\GameObject\CameraWrapper.h"
 #include "utils/parser.h"
 
 #include "interpstrategies\supportedstrategies.h"
+#include "bakkesmod/wrappers/ReplayWrapper.h"
 
 void DollyCam::UpdateRenderPath()
 {
+	if (!gameWrapper->IsInReplay())
+		return;
 	currentRenderPath = make_shared<savetype>(savetype());
 	CVarWrapper interpMode = cvarManager->getCvar("dolly_interpmode_location");
 	auto locationRenderStrategy = CreateInterpStrategy(interpMode.getIntValue());

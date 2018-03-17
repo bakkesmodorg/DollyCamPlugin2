@@ -1,7 +1,7 @@
 #include "dollycamplugin.h"
 #include "gameapplier.h"
 #include "bakkesmod\wrappers\replaywrapper.h"
-#include "bakkesmod\wrappers\camerawrapper.h"
+#include "bakkesmod\wrappers\GameObject\camerawrapper.h"
 
 #include "utils\parser.h"
 #include "serialization.h"

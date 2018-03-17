@@ -1,5 +1,5 @@
 #include "gameapplier.h"
-#include "bakkesmod\wrappers\camerawrapper.h"
+#include "bakkesmod\wrappers\GameObject\CameraWrapper.h"
 #include <iostream>
 #include <fstream>
 
