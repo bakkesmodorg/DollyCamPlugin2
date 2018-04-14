@@ -101,6 +101,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>F:\Bakkesmod\development\BakkesMod-rewrite\Release</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>python "F:\Bakkesmod\development\quicktest\bakkes_patchplugin.py" "$(TargetPath)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>

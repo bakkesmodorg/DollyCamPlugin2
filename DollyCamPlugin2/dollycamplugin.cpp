@@ -13,7 +13,7 @@ BAKKESMOD_PLUGIN(DollyCamPlugin, "Dollycam plugin", "2", PLUGINTYPE_REPLAY | PLU
 
 bool DollyCamPlugin::IsApplicable()
 {
-	return gameWrapper->IsInReplay() && gameWrapper->GetCamera().GetCameraState().compare("CameraState_ReplayFly_TA") == 0;
+	return gameWrapper->IsInReplay() && !gameWrapper->GetCamera().IsNull() && gameWrapper->GetCamera().GetCameraState().compare("CameraState_ReplayFly_TA") == 0;
 }
 
 void DollyCamPlugin::onLoad()
@@ -55,6 +55,8 @@ void DollyCamPlugin::onLoad()
 	cvarManager->registerNotifier("dolly_snapshot_delete", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
 
 
+	cvarManager->registerNotifier("dolly_live_openfly", bind(&DollyCamPlugin::OnLiveCommand, this, _1));
+	cvarManager->registerNotifier("dolly_live_playpath", bind(&DollyCamPlugin::OnLiveCommand, this, _1));
 
 	cvarManager->registerNotifier("dolly_bezier_weight", bind(&DollyCamPlugin::OnBezierCommand, this, _1));
 	cvarManager->registerCvar("dolly_chaikin_degree", "0", "Amount of times to apply chaikin to the spline", true, true, 0, true, 20).addOnValueChanged(bind(&DollyCamPlugin::OnChaikinChanged, this, _1, _2));;
@@ -293,6 +295,10 @@ void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
 		int id = get_safe_int(params.at(1));
 		dollyCam->DeleteFrame(id);
 	}
+}
+
+void DollyCamPlugin::OnLiveCommand(vector<string> params)
+{
 }
 
 void DollyCamPlugin::onRender(CanvasWrapper canvas)

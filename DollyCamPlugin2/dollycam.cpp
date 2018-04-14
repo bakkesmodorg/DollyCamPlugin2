@@ -325,7 +325,8 @@ shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy(int interpStrategy)
 		return std::make_shared<CosineInterpStrategy>(CosineInterpStrategy(currentPath));
 		break;
 	case 3:
-		return std::make_shared<HermiteInterpStrategy>(HermiteInterpStrategy(currentPath));
+		std::make_shared<LinearInterpStrategy>(LinearInterpStrategy(currentPath, chaikinDegree));
+		//return std::make_shared<HermiteInterpStrategy>(HermiteInterpStrategy(currentPath));
 		break;
 	case 4:
 		return std::make_shared<CatmullRomInterpStrategy>(CatmullRomInterpStrategy(currentPath, chaikinDegree));
