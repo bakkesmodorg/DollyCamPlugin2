@@ -1,6 +1,6 @@
 #include "dollycamplugin.h"
 #include "gameapplier.h"
-#include "bakkesmod\wrappers\replaywrapper.h"
+#include "bakkesmod\wrappers\replayserverwrapper.h"
 #include "bakkesmod\wrappers\GameObject\camerawrapper.h"
 
 #include "utils\parser.h"
@@ -13,7 +13,7 @@ BAKKESMOD_PLUGIN(DollyCamPlugin, "Dollycam plugin", "2", PLUGINTYPE_REPLAY | PLU
 
 bool DollyCamPlugin::IsApplicable()
 {
-	return gameWrapper->IsInReplay() && !gameWrapper->GetCamera().IsNull() && gameWrapper->GetCamera().GetCameraState().compare("CameraState_ReplayFly_TA") == 0;
+	return (gameWrapper->IsInReplay() || gameWrapper->IsInGame()) && !gameWrapper->GetCamera().IsNull() && gameWrapper->GetCamera().GetCameraState().compare("CameraState_ReplayFly_TA") == 0;
 }
 
 void DollyCamPlugin::onLoad()
@@ -299,6 +299,36 @@ void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
 
 void DollyCamPlugin::OnLiveCommand(vector<string> params)
 {
+	string command = params.at(0);
+	if (!gameWrapper->IsInGame())
+	{
+		cvarManager->log("You need to be in a game to execute this command");
+		return;
+	}
+	if (command.compare("dolly_live_playpath") == 0)
+	{
+		//Transform the path to make it so the first frame starts at the current frame
+		int currentFrame = gameWrapper->GetGameEventAsServer().GetReplayDirector().GetReplay().GetCurrentFrame() + 1;
+		auto path = dollyCam->GetCurrentPath();
+		int startFrame = path->begin()->first;
+		std::shared_ptr<savetype> newPath = std::make_shared<savetype>(savetype());
+		for (auto elem : *path)
+		{
+			CameraSnapshot newSnapshot = elem.second;
+			newSnapshot.frame = (newSnapshot.frame - startFrame) + currentFrame;
+			if (elem.first == (--path->end())->first) {
+				dollyCam->SetCurrentPath(newPath);
+				dollyCam->InsertSnapshot(newSnapshot);
+				//newPath->insert(std::make_pair(newSnapshot.frame, newSnapshot));
+			}
+			else
+			{
+				newPath->insert(std::make_pair(newSnapshot.frame, newSnapshot));
+			}
+		}
+		
+		cvarManager->executeCommand("dolly_activate");
+	}
 }
 
 void DollyCamPlugin::onRender(CanvasWrapper canvas)

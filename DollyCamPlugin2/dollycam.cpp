@@ -1,11 +1,10 @@
 #include "dollycam.h"
 #include "bakkesmod\wrappers\gamewrapper.h"
-#include "bakkesmod\wrappers\replaywrapper.h"
+#include "bakkesmod\wrappers\replayserverwrapper.h"
 #include "bakkesmod\wrappers\GameObject\CameraWrapper.h"
 #include "utils/parser.h"
 
 #include "interpstrategies\supportedstrategies.h"
-#include "bakkesmod/wrappers/ReplayWrapper.h"
 #include "serialization.h"
 
 
@@ -79,7 +78,7 @@ CameraSnapshot DollyCam::TakeSnapshot(bool saveToPath)
 	if (!gameWrapper->IsInReplay())
 		return save;
 
-	ReplayWrapper sw = gameWrapper->GetGameEventAsReplay();
+	ReplayServerWrapper sw = gameWrapper->GetGameEventAsReplay();
 	CameraWrapper flyCam = gameWrapper->GetCamera();
 	if (sw.IsNull())
 		return save;
@@ -130,8 +129,20 @@ float diff = .0f;
 bool isFirst = true;
 void DollyCam::Apply()
 {
-	ReplayWrapper sw = gameWrapper->GetGameEventAsReplay();
-	int currentFrame = sw.GetCurrentReplayFrame();
+	int currentFrame = 0;
+	ServerWrapper sw(NULL);
+	if (gameWrapper->IsInReplay()) {
+		currentFrame = gameWrapper->GetGameEventAsReplay().GetCurrentReplayFrame();
+		sw = gameWrapper->GetGameEventAsReplay();
+	}
+	else if (gameWrapper->IsInGame()) {
+		sw = gameWrapper->GetGameEventAsServer();
+		currentFrame = sw.GetReplayDirector().GetReplay().GetCurrentFrame();
+	}
+	else
+	{
+		return;
+	}
 	if (currentFrame < currentPath->begin()->first || currentFrame > (--currentPath->end())->first)
 		return;
 	//cvarManager->log("Frame: " + to_string(currentFrame) + ". Replay time: " + to_string(sw.GetReplayTimeElapsed()));
@@ -146,10 +157,10 @@ void DollyCam::Apply()
 		isFirst = true;
 	}
 
-	NewPOV pov = locationInterpStrategy->GetPOV(sw.GetSecondsElapsed() - diff + currentPath->begin()->second.timeStamp, sw.GetCurrentReplayFrame());
+	NewPOV pov = locationInterpStrategy->GetPOV(sw.GetSecondsElapsed() - diff + currentPath->begin()->second.timeStamp, currentFrame);
 	if (!usesSameInterp)
 	{
-		NewPOV secondaryPov = rotationInterpStrategy->GetPOV(sw.GetSecondsElapsed() - diff + currentPath->begin()->second.timeStamp, sw.GetCurrentReplayFrame());
+		NewPOV secondaryPov = rotationInterpStrategy->GetPOV(sw.GetSecondsElapsed() - diff + currentPath->begin()->second.timeStamp, currentFrame);
 		pov.rotation = secondaryPov.rotation;
 		pov.FOV = secondaryPov.FOV;
 	}
@@ -224,7 +235,7 @@ void DollyCam::Render(CanvasWrapper cw)
 	if (!renderPath || !currentRenderPath || currentRenderPath->size() < 2)
 		return;
 
-	ReplayWrapper sw = gameWrapper->GetGameEventAsReplay();
+	ServerWrapper sw = gameWrapper->GetGameEventAsReplay();
 	int currentFrame = sw.GetCurrentReplayFrame();
 
 	Vector2 prevLine = cw.Project(currentRenderPath->begin()->second.location);
@@ -368,4 +379,14 @@ void DollyCam::LoadFromFile(string filename)
 
 	this->RefreshInterpData();
 	this->RefreshInterpDataRotation();
+}
+
+std::shared_ptr<savetype> DollyCam::GetCurrentPath()
+{
+	return currentPath;
+}
+
+void DollyCam::SetCurrentPath(std::shared_ptr<savetype> newPath)
+{
+	currentPath = newPath;
 }

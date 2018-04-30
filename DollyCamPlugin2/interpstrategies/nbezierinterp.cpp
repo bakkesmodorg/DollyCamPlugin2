@@ -26,7 +26,7 @@ NewPOV NBezierInterpStrategy::GetPOV(float gameTime, int latestFrame)
 	float fov = 0;
 	int n = camPath->size();
 	int k = 0;
-	CustomRotator lastRotator = camPath->begin()->second.rotation.ToRotator();
+	Rotator lastRotator = camPath->begin()->second.rotation.ToRotator();
 	Rotator addedRotator = { -16364 + 16340, -32768 + 32764, -32768 + 32764 };
 	for (savetype::iterator it = camPath->begin(); it != camPath->end(); it++)
 	{
@@ -47,7 +47,7 @@ NewPOV NBezierInterpStrategy::GetPOV(float gameTime, int latestFrame)
 
 
 		float fov2 = pofact * (weight * it->second.FOV);
-		CustomRotator usedRotator;
+		Rotator usedRotator;
 		if (it != camPath->begin()) {
 			Rotator rotDiff = CustomRotator(lastRotator).diffTo(it->second.rotation).ToRotator();
 			usedRotator = lastRotator + rotDiff;
@@ -56,7 +56,7 @@ NewPOV NBezierInterpStrategy::GetPOV(float gameTime, int latestFrame)
 		{
 			usedRotator = it->second.rotation.ToRotator();
 		}
-		CustomRotator r2 = { usedRotator.Pitch * pofact, usedRotator.Yaw * pofact, usedRotator.Roll * pofact };
+		Rotator r2 = { (int)((float)usedRotator.Pitch * pofact), (int)((float)usedRotator.Yaw * pofact), (int)((float)usedRotator.Roll * pofact) };
 		lastRotator = usedRotator;
 		v = v + v2;
 		rot.Pitch += r2.Pitch;
