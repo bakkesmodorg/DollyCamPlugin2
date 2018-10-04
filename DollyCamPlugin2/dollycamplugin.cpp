@@ -23,42 +23,49 @@ void DollyCamPlugin::onLoad()
 	renderCameraPath = std::make_shared<bool>(true);
 
 	gameWrapper->HookEvent("Function TAGame.CameraState_ReplayFly_TA.UpdatePOV", bind(&DollyCamPlugin::onTick, this, _1));
-	gameWrapper->RegisterDrawable(bind(&DollyCamPlugin::onRender, this, _1));
+	gameWrapper->HookEvent("Function TAGame.GameInfo_Replay_TA.InitGame", bind(&DollyCamPlugin::onReplayOpen, this, _1));
+	gameWrapper->HookEvent("Function TAGame.GFxHUD_Replay_TA.Destroyed", bind(&DollyCamPlugin::onReplayClose, this, _1));
+	
 
 	cvarManager->registerCvar("dolly_interpmode", "0", "Used interp mode", true, true, 0, true, 2000).addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
 	
-	cvarManager->registerCvar("dolly_interpmode_location", "0", "Used interp mode for location", true, true, 0, true, 2000).addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
-	cvarManager->registerCvar("dolly_interpmode_rotation", "0", "Used interp mode for rotation", true, true, 0, true, 2000).addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
+	cvarManager->registerCvar("dolly_interpmode_location", "0", "Used interp mode for location", true, true, 0, true, 2000)
+		.addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
+	cvarManager->registerCvar("dolly_interpmode_rotation", "0", "Used interp mode for rotation", true, true, 0, true, 2000)
+		.addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
 
 	
 	cvarManager->registerCvar("dolly_render", "1", "Render the current camera path", true, true, 0, true, 1).bindTo(renderCameraPath);
+
 	cvarManager->registerCvar("dolly_render_frame", "1", "Render frame numbers on the path", true, true, 0, true, 1).addOnValueChanged(bind(&DollyCamPlugin::OnRenderFramesChanged, this, _1, _2));
 
-	cvarManager->registerNotifier("dolly_path_clear", bind(&DollyCamPlugin::OnAllCommand, this, _1));
-	cvarManager->registerNotifier("dolly_snapshot_take", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
-	cvarManager->registerNotifier("dolly_activate", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
-	cvarManager->registerNotifier("dolly_deactivate", bind(&DollyCamPlugin::OnReplayCommand, this, _1));
+	cvarManager->registerNotifier("dolly_path_clear", bind(&DollyCamPlugin::OnAllCommand, this, _1), "Clears the current dollycam path", PERMISSION_ALL);
+	cvarManager->registerNotifier("dolly_snapshot_take", bind(&DollyCamPlugin::OnReplayCommand, this, _1), "Saves the current camera view as snapshot", PERMISSION_REPLAY);
+	cvarManager->registerNotifier("dolly_activate", bind(&DollyCamPlugin::OnReplayCommand, this, _1), "Activates the dollycam (Plays current path) ", PERMISSION_REPLAY);
+	cvarManager->registerNotifier("dolly_deactivate", bind(&DollyCamPlugin::OnReplayCommand, this, _1), "Deactivates the dollycam", PERMISSION_REPLAY);
+	cvarManager->registerNotifier("dolly_replayinfo", bind(&DollyCamPlugin::OnInReplayCommand, this, _1), "Prints current replay information to the console", PERMISSION_REPLAY);
 
-	cvarManager->registerNotifier("dolly_path_save", bind(&DollyCamPlugin::OnAllCommand, this, _1));
-	cvarManager->registerNotifier("dolly_path_load", bind(&DollyCamPlugin::OnAllCommand, this, _1));
+	cvarManager->registerNotifier("dolly_path_save", bind(&DollyCamPlugin::OnAllCommand, this, _1), "Saves the current dolly path to a file. Usage: dolly_path_save filename", PERMISSION_ALL);
+	cvarManager->registerNotifier("dolly_path_load", bind(&DollyCamPlugin::OnAllCommand, this, _1), "Loads the current dolly path from a file. Usage: dolly_path_load filename", PERMISSION_ALL);
 
-	cvarManager->registerNotifier("dolly_cam_show", bind(&DollyCamPlugin::OnCamCommand, this, _1));
-	cvarManager->registerNotifier("dolly_cam_set_location", bind(&DollyCamPlugin::OnCamCommand, this, _1));
-	cvarManager->registerNotifier("dolly_cam_set_rotation", bind(&DollyCamPlugin::OnCamCommand, this, _1));
-	cvarManager->registerNotifier("dolly_cam_set_fov", bind(&DollyCamPlugin::OnCamCommand, this, _1));
-	cvarManager->registerNotifier("dolly_cam_set_frame", bind(&DollyCamPlugin::OnCamCommand, this, _1));
+	cvarManager->registerNotifier("dolly_cam_show", bind(&DollyCamPlugin::OnCamCommand, this, _1), "Prints the current camera info to the console", PERMISSION_REPLAY);
+	cvarManager->registerNotifier("dolly_cam_set_location", bind(&DollyCamPlugin::OnCamCommand, this, _1), "Sets the location of the camera to the given parameters. Usage: dolly_cam_set_location x y z", PERMISSION_REPLAY);
+	cvarManager->registerNotifier("dolly_cam_set_rotation", bind(&DollyCamPlugin::OnCamCommand, this, _1), "Sets the rotation of the camera to the given parameters. Usage: dolly_cam_set_roation pitch yaw roll", PERMISSION_REPLAY);
+	cvarManager->registerNotifier("dolly_cam_set_fov", bind(&DollyCamPlugin::OnCamCommand, this, _1), "Sets the FOV of the camera to the given parameters. Usage: dolly_cam_set_fov fov", PERMISSION_REPLAY);
+	cvarManager->registerNotifier("dolly_cam_set_frame", bind(&DollyCamPlugin::OnCamCommand, this, _1), "Jumps to the given frame in the replay. Usage: dolly_cam_set_frame frame (NOT WORKING AS OF NOW)", PERMISSION_REPLAY);
 
-	cvarManager->registerNotifier("dolly_snapshot_list", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
-	cvarManager->registerNotifier("dolly_snapshot_info", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
+	cvarManager->registerNotifier("dolly_snapshot_list", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1), "Lists all snapshots in the current dolly path", PERMISSION_ALL);
+	cvarManager->registerNotifier("dolly_snapshot_info", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1), "Displays information of given snapshot. Usage: dolly_snapshot_info snapshotid", PERMISSION_ALL);
 	//cvarManager->registerNotifier("dolly_snapshot_set", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
-	cvarManager->registerNotifier("dolly_snapshot_override", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
-	cvarManager->registerNotifier("dolly_snapshot_delete", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1));
+	cvarManager->registerNotifier("dolly_snapshot_override", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1), "Overrides the given snapshot with a new snapshot (except for frameno). Usage: dolly_snapshot_override snapshotid", PERMISSION_REPLAY);
+	cvarManager->registerNotifier("dolly_snapshot_delete", bind(&DollyCamPlugin::OnSnapshotCommand, this, _1), "Deletes the given snapshot. Usage: dolly_snapshot_delete snapshotid", PERMISSION_REPLAY);
+	cvarManager->registerNotifier("dolly_snapshot_select", bind(&DollyCamPlugin::OnSnapshotModifyCommand, this, _1), "Selects snapshot for editing (WIP, NOT WORKING)", PERMISSION_REPLAY);
+
+	//cvarManager->registerNotifier("dolly_live_openfly", bind(&DollyCamPlugin::OnLiveCommand, this, _1), "Automatically goes to flycam (WIP, NOT WORKING)", PERMISSION_REPLAY);
+	//cvarManager->registerNotifier("dolly_live_playpath", bind(&DollyCamPlugin::OnLiveCommand, this, _1), "Plays the loaded path in the current game (REQUIRES SPECTATOR, WIP)", PERMISSION_ALL);
 
 
-	cvarManager->registerNotifier("dolly_live_openfly", bind(&DollyCamPlugin::OnLiveCommand, this, _1));
-	cvarManager->registerNotifier("dolly_live_playpath", bind(&DollyCamPlugin::OnLiveCommand, this, _1));
-
-	cvarManager->registerNotifier("dolly_bezier_weight", bind(&DollyCamPlugin::OnBezierCommand, this, _1));
+	cvarManager->registerNotifier("dolly_bezier_weight", bind(&DollyCamPlugin::OnBezierCommand, this, _1), "Change bezier weight of given snapshot (Unsupported?). Usage: dolly_bezier_weight", PERMISSION_ALL);
 	cvarManager->registerCvar("dolly_chaikin_degree", "0", "Amount of times to apply chaikin to the spline", true, true, 0, true, 20).addOnValueChanged(bind(&DollyCamPlugin::OnChaikinChanged, this, _1, _2));;
 
 	dollyCam->SetRenderPath(true);
@@ -77,6 +84,16 @@ void DollyCamPlugin::PrintSnapshotInfo(CameraSnapshot shot)
 	cvarManager->log("Rotation " + rotator_to_string(shot.rotation.ToRotator()));
 }
 
+
+void DollyCamPlugin::onReplayOpen(std::string funcName)
+{
+	gameWrapper->RegisterDrawable(bind(&DollyCamPlugin::onRender, this, _1));
+}
+
+void DollyCamPlugin::onReplayClose(std::string funcName)
+{
+	gameWrapper->UnregisterDrawables();
+}
 
 void DollyCamPlugin::onTick(std::string funcName)
 {
@@ -125,20 +142,22 @@ void DollyCamPlugin::OnAllCommand(vector<string> params)
 
 void DollyCamPlugin::OnCamCommand(vector<string> params)
 {
+	string command = params.at(0);
+	CameraWrapper camera = gameWrapper->GetCamera();
+	if (command.compare("dolly_cam_show") == 0 && !camera.IsNull())
+	{
+		CameraSnapshot cameraInfo = dollyCam->TakeSnapshot(false);
+		this->PrintSnapshotInfo(cameraInfo);
+		return;
+	}
+	
 	if (!IsApplicable())
 	{
 		cvarManager->log("You cannot use that command here. Make sure you're in flycam");
 		return;
 	}
 
-	string command = params.at(0);
-	CameraWrapper camera = gameWrapper->GetCamera();
-	if (command.compare("dolly_cam_show") == 0)
-	{
-		CameraSnapshot cameraInfo = dollyCam->TakeSnapshot(false);
-		this->PrintSnapshotInfo(cameraInfo);
-	} 
-	else if (command.compare("dolly_cam_set_location") == 0)
+	if (command.compare("dolly_cam_set_location") == 0)
 	{
 		if (params.size() < 4) {
 			cvarManager->log("Usage: " + params.at(0) + " x y z");
@@ -182,6 +201,39 @@ void DollyCamPlugin::OnCamCommand(vector<string> params)
 	}
 }
 
+void DollyCamPlugin::OnInReplayCommand(vector<string> params)
+{
+	if (!gameWrapper->IsInReplay())
+	{
+		cvarManager->log("You need to be in a replay to execute this command");
+		return;
+	}
+	std::string command = params.at(0);
+	if (command.compare("dolly_replayinfo") == 0)
+	{
+		ReplayServerWrapper replayServer = gameWrapper->GetGameEventAsReplay();
+		ReplayDirectorWrapper replayDirector = replayServer.GetReplayDirector();
+		if (replayDirector.IsNull())
+		{
+			cvarManager->log("Replay director is NULL!");
+			return;
+		}
+		ReplaySoccarWrapper replay = replayDirector.GetReplay();
+		/*if (replay.IsNull())
+		{
+			cvarManager->log("Replay is NULL!");
+			return;
+		}*/
+		cvarManager->log(string_format("Replay name: %s", replay.GetReplayName().ToString()));
+		cvarManager->log(string_format("File: %s, ID: %s, date: %s", 
+			replay.GetFilename().ToString(), replay.GetId().ToString(), replay.GetDate().ToString()));
+		cvarManager->log(string_format("Game: %i vs %i, score: %i - %i ",
+			replay.GetTeamSize(), replay.GetTeamSize(), replay.GetTeam0Score(), replay.GetTeam1Score()));
+		cvarManager->log(string_format("FPS: %i, frames: %i, record by: ",
+			replay.GetRecordFPS(), replay.GetNumFrames(), replay.GetPlayerName().ToString()));
+	}
+}
+
 void DollyCamPlugin::OnReplayCommand(vector<string> params)
 {
 	if (!IsApplicable())
@@ -212,7 +264,6 @@ void DollyCamPlugin::OnReplayCommand(vector<string> params)
 	{
 		dollyCam->Activate();
 	}
-
 }
 
 void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
@@ -297,6 +348,32 @@ void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
 	}
 }
 
+void DollyCamPlugin::OnSnapshotModifyCommand(vector<string> params)
+{
+	string command = params.at(0);
+	if (!gameWrapper->IsInGame())
+	{
+		cvarManager->log("You need to be in a game to execute this command");
+		return;
+	}
+	if (command.compare("dolly_snapshot_select") == 0)
+	{
+		if (params.size() == 1)
+		{
+			cvarManager->log("Usage: " + command + " snapshotid");
+			return;
+		}
+		int snapshot_id = get_safe_float(params.at(1));
+		if (!dollyCam->IsFrameUsed(snapshot_id))
+		{
+			cvarManager->log("Snapshot #" + to_string(snapshot_id) + " not found");
+			return;
+		}
+		selectedSnapshot = dollyCam->GetSnapshot(snapshot_id);
+
+	}
+}
+
 void DollyCamPlugin::OnLiveCommand(vector<string> params)
 {
 	string command = params.at(0);
@@ -328,6 +405,10 @@ void DollyCamPlugin::OnLiveCommand(vector<string> params)
 		}
 		
 		cvarManager->executeCommand("dolly_activate");
+	}
+	else if (command.compare("dolly_live_openfly") == 0)
+	{
+
 	}
 }
 

@@ -235,7 +235,7 @@ void DollyCam::Render(CanvasWrapper cw)
 	if (!renderPath || !currentRenderPath || currentRenderPath->size() < 2)
 		return;
 
-	ServerWrapper sw = gameWrapper->GetGameEventAsReplay();
+	ReplayServerWrapper sw = gameWrapper->GetGameEventAsReplay();
 	int currentFrame = sw.GetCurrentReplayFrame();
 
 	Vector2 prevLine = cw.Project(currentRenderPath->begin()->second.location);
