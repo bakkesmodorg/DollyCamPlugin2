@@ -48,6 +48,7 @@ void DollyCamPlugin::onLoad()
 	cvarManager->registerNotifier("dolly_path_save", bind(&DollyCamPlugin::OnAllCommand, this, _1), "Saves the current dolly path to a file. Usage: dolly_path_save filename", PERMISSION_ALL);
 	cvarManager->registerNotifier("dolly_path_load", bind(&DollyCamPlugin::OnAllCommand, this, _1), "Loads the current dolly path from a file. Usage: dolly_path_load filename", PERMISSION_ALL);
 
+	cvarManager->registerNotifier("dolly_cam_clone", bind(&DollyCamPlugin::OnCamCommand, this, _1), "Clones the current camera info into a snapshot", PERMISSION_REPLAY);
 	cvarManager->registerNotifier("dolly_cam_show", bind(&DollyCamPlugin::OnCamCommand, this, _1), "Prints the current camera info to the console", PERMISSION_REPLAY);
 	cvarManager->registerNotifier("dolly_cam_set_location", bind(&DollyCamPlugin::OnCamCommand, this, _1), "Sets the location of the camera to the given parameters. Usage: dolly_cam_set_location x y z", PERMISSION_REPLAY);
 	cvarManager->registerNotifier("dolly_cam_set_rotation", bind(&DollyCamPlugin::OnCamCommand, this, _1), "Sets the rotation of the camera to the given parameters. Usage: dolly_cam_set_roation pitch yaw roll", PERMISSION_REPLAY);
@@ -150,7 +151,12 @@ void DollyCamPlugin::OnCamCommand(vector<string> params)
 		this->PrintSnapshotInfo(cameraInfo);
 		return;
 	}
-	
+	if (command.compare("dolly_cam_clone") == 0 && !camera.IsNull())
+	{
+		CameraSnapshot cameraInfo = dollyCam->TakeSnapshot(true);
+		return;
+	}
+
 	if (!IsApplicable())
 	{
 		cvarManager->log("You cannot use that command here. Make sure you're in flycam");
