@@ -45,6 +45,42 @@
     <ClInclude Include="interpstrategies\catmullrominterp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imconfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_additions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_impl_dx9.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_rangeslider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_tabs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_timeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imguivariouscontrols.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\stb_rect_pack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\stb_textedit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\stb_truetype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dollycamplugin.cpp">
@@ -72,6 +108,33 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="interpstrategies\catmullrominterp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dollycamplugin_gui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_additions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_draw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_impl_dx9.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_rangeslider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_tabs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_timeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imguivariouscontrols.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

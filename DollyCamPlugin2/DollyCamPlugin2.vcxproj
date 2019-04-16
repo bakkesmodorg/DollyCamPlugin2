@@ -94,7 +94,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>F:\Bakkesmod\development\BakkesMod-rewrite\BakkesMod Rewrite;C:\Users\Chris\Downloads\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>F:\Bakkesmod\development\BakkesMod-rewrite\BakkesMod Rewrite;C:\Users\Chris\Downloads\include;C:\Users\Chris\Downloads\imgui-master(1)\imgui-master</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);PLUGIN_GUI;_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -119,6 +120,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imconfig.h" />
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui.h" />
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imguivariouscontrols.h" />
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_additions.h" />
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_impl_dx9.h" />
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_internal.h" />
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_rangeslider.h" />
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_tabs.h" />
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_timeline.h" />
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\stb_rect_pack.h" />
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\stb_textedit.h" />
+    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\stb_truetype.h" />
     <ClInclude Include="interpstrategies\catmullrominterp.h" />
     <ClInclude Include="dollycam.h" />
     <ClInclude Include="dollycamplugin.h" />
@@ -131,6 +144,15 @@
     <ClInclude Include="serialization.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui.cpp" />
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imguivariouscontrols.cpp" />
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_additions.cpp" />
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_impl_dx9.cpp" />
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_rangeslider.cpp" />
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_tabs.cpp" />
+    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_timeline.cpp" />
+    <ClCompile Include="dollycamplugin_gui.cpp" />
     <ClCompile Include="interpstrategies\catmullrominterp.cpp" />
     <ClCompile Include="dollycam.cpp" />
     <ClCompile Include="dollycamplugin.cpp" />

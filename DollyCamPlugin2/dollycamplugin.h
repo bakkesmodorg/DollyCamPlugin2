@@ -1,9 +1,13 @@
 #pragma once
 #pragma comment(lib, "BakkesMod.lib")
 #include "bakkesmod\plugin\bakkesmodplugin.h"
+#include "bakkesmod\plugin\pluginwindow.h"
 #include "dollycam.h"
 
 class DollyCamPlugin : public BakkesMod::Plugin::BakkesModPlugin
+#ifdef PLUGIN_GUI
+	, public BakkesMod::Plugin::PluginWindow
+#endif
 {
 private:
 	std::shared_ptr<DollyCam> dollyCam;
@@ -40,4 +44,10 @@ public:
 
 	//Interp config methods
 	void OnBezierCommand(vector<string> params);
+#ifdef PLUGIN_GUI
+	virtual void Render();
+	virtual std::string GetMenuName();
+	virtual std::string GetMenuTitle();
+	virtual void SetImGuiContext(uintptr_t ctx);
+#endif
 };

@@ -13,7 +13,16 @@ BAKKESMOD_PLUGIN(DollyCamPlugin, "Dollycam plugin", "2", PLUGINTYPE_REPLAY | PLU
 
 bool DollyCamPlugin::IsApplicable()
 {
-	return (gameWrapper->IsInReplay() || gameWrapper->IsInGame()) && !gameWrapper->GetCamera().IsNull() && gameWrapper->GetCamera().GetCameraState().compare("CameraState_ReplayFly_TA") == 0;
+	if (gameWrapper->IsInReplay() || gameWrapper->IsInGame())
+	{
+		CameraWrapper camera = gameWrapper->GetCamera();
+		if (!camera.IsNull())
+		{
+			std::string cameraState = gameWrapper->GetCamera().GetCameraState();
+			return cameraState.compare("CameraState_ReplayFly_TA") == 0;
+		}
+	}
+	return false;
 }
 
 void DollyCamPlugin::onLoad()
@@ -22,7 +31,7 @@ void DollyCamPlugin::onLoad()
 	dollyCam = std::make_shared<DollyCam>(DollyCam(gameWrapper, cvarManager, gameApplier));
 	renderCameraPath = std::make_shared<bool>(true);
 
-	gameWrapper->HookEvent("Function TAGame.CameraState_ReplayFly_TA.UpdatePOV", bind(&DollyCamPlugin::onTick, this, _1));
+	gameWrapper->HookEvent("Function TAGame.CameraState_Replay_TA.UpdatePOV", bind(&DollyCamPlugin::onTick, this, _1));
 	gameWrapper->HookEvent("Function TAGame.GameInfo_Replay_TA.InitGame", bind(&DollyCamPlugin::onReplayOpen, this, _1));
 	gameWrapper->HookEvent("Function TAGame.GFxHUD_Replay_TA.Destroyed", bind(&DollyCamPlugin::onReplayClose, this, _1));
 	
@@ -97,6 +106,7 @@ void DollyCamPlugin::onReplayClose(std::string funcName)
 
 void DollyCamPlugin::onTick(std::string funcName)
 {
+
 	if (!IsApplicable() || !dollyCam->IsActive())
 		return;
 	dollyCam->Apply();
