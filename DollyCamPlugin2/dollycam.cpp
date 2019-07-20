@@ -83,7 +83,8 @@ CameraSnapshot DollyCam::TakeSnapshot(bool saveToPath)
 	if (sw.IsNull())
 		return save;
 	
-	save.timeStamp = sw.GetReplayTimeElapsed();
+	//save.timeStamp = sw.GetReplayTimeElapsed();
+	save.timeStamp = sw.GetCurrentReplayFrame()/30.f;
 	save.FOV = flyCam.GetFOV();
 	save.location = flyCam.GetLocation();
 	save.rotation = CustomRotator(flyCam.GetRotation());
@@ -283,7 +284,9 @@ void DollyCam::Render(CanvasWrapper cw)
 			boxLoc.X -= 5;
 			boxLoc.Y -= 5;
 			cw.SetPosition(boxLoc);
-			cw.FillBox({ 10, 10});
+			auto tmp = Vector2();
+			tmp.X = 10; tmp.Y = 10;
+			cw.FillBox(tmp);
 			cw.SetColor(0, 0, 0, 255);
 			cw.DrawString(to_string(it->first) + " (w:" + to_string_with_precision(it->second.weight, 2) + ")");
 		}
@@ -342,6 +345,8 @@ shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy(int interpStrategy)
 	case 4:
 		return std::make_shared<CatmullRomInterpStrategy>(CatmullRomInterpStrategy(currentPath, chaikinDegree));
 		break;
+	case 5:
+		return std::make_shared<SplineInterpStrategy>(SplineInterpStrategy(currentPath, chaikinDegree));
 	}
 
 	cvarManager->log("Interpstrategy not found!!! Defaulting to linear interp.");

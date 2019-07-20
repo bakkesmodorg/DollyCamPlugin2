@@ -239,14 +239,14 @@ void DollyCamPlugin::OnInReplayCommand(vector<string> params)
 		{
 			cvarManager->log("Replay is NULL!");
 			return;
-		}*/
+		}*//*
 		cvarManager->log(string_format("Replay name: %s", replay.GetReplayName().ToString()));
 		cvarManager->log(string_format("File: %s, ID: %s, date: %s", 
 			replay.GetFilename().ToString(), replay.GetId().ToString(), replay.GetDate().ToString()));
 		cvarManager->log(string_format("Game: %i vs %i, score: %i - %i ",
 			replay.GetTeamSize(), replay.GetTeamSize(), replay.GetTeam0Score(), replay.GetTeam1Score()));
 		cvarManager->log(string_format("FPS: %i, frames: %i, record by: ",
-			replay.GetRecordFPS(), replay.GetNumFrames(), replay.GetPlayerName().ToString()));
+			replay.GetRecordFPS(), replay.GetNumFrames(), replay.GetPlayerName().ToString()));*/
 	}
 }
 
