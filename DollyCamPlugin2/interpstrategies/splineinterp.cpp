@@ -1,9 +1,7 @@
 #include <map>
 #include "splineinterp.h"
-#include "tinyspline\tinysplinecpp.h"
 #include "nbezierinterp.h"
-#include "bakkesmod\wrappers\wrapperstructs.h"
-#include "Quaternions\quaternions.h"
+//#include "bakkesmod\wrappers\wrapperstructs.h"
 
 
 
@@ -17,9 +15,7 @@ NewPOV SplineInterpStrategy::GetPOV(float gameTime, int latestFrame)
 {
 	auto t = GetRelativeTime(gameTime);
 
-	CustomRotator rot;
-	Vector v;
-	float fov = 0;
+
 	int n = camPath->size();
 	if (n < 4)
 	{
@@ -27,40 +23,25 @@ NewPOV SplineInterpStrategy::GetPOV(float gameTime, int latestFrame)
 	}
 	auto nextSnapshot = camPath->upper_bound(latestFrame);
 	auto currentSnapshot = std::prev(nextSnapshot);
-	if (currentSnapshot == camPath->end() || nextSnapshot == camPath->end() || camPath->begin()->first > latestFrame) //We're at the end of the playback
+	if (currentSnapshot == camPath->end() || nextSnapshot == camPath->end() || camPath->begin()->first > latestFrame || t > 1) //We're at the end of the playback
 		return{ Vector(0), CustomRotator(0,0,0), 0 };
 
 	InitPositions(n);
-	//InitRotations(n);
+	InitRotations(n);
 	InitFOVs(n);
 
 	auto posRes = camPositions.eval(t).result();
-	//auto rotRes = camRotations.eval(t).result();
+	auto rotRes = camRotations.eval(t).result();
 	auto fovRes = camFOVs.eval(t).result();
 
+	Vector v;
 	v.X = float(posRes[1]);
 	v.Y = float(posRes[2]);
 	v.Z = float(posRes[3]);
 
-	fov = float(fovRes[1]);
+	float fov = float(fovRes[1]);
 
-
-	float frameDiff = nextSnapshot->second.timeStamp - currentSnapshot->second.timeStamp;
-	float timeElapsed = gameTime - currentSnapshot->second.timeStamp;
-	float percElapsed = timeElapsed / frameDiff;
-
-	auto prevRot = currentSnapshot->second.rotation;
-	auto nextRot = nextSnapshot->second.rotation;
-
-	auto q1 = ToQuaternion(prevRot);
-	auto q2 = ToQuaternion(nextRot);
-	auto qSlerp = slerp(q1, q2, percElapsed);
-	rot = ToCustomRotator(qSlerp);
-
-	//auto prevVec = RotatorToVector(prevRot.ToRotator());
-	//auto nextVec = RotatorToVector(nextRot.ToRotator());
-	//auto slerpVec = Vector::slerp(prevVec, nextVec, percElapsed);
-	//rot = CustomRotator(VectorToRotator(slerpVec));
+	CustomRotator rot = CustomRotator(float(rotRes[1]), float(rotRes[2]), float(rotRes[3]));
 
 	return {v, rot, fov};
 }
@@ -101,16 +82,30 @@ void SplineInterpStrategy::InitRotations(int numberOfPoints)
 {
 	camRotations = tinyspline::BSpline(numberOfPoints, 4);
 
+	auto previousRotation = camPath->begin()->second.rotation;
+	float accumulatedPitch = previousRotation.Pitch._value;
+	float accumulatedYaw = previousRotation.Yaw._value;
+	float accumulatedRoll = previousRotation.Roll._value;
+
 	auto rotationControllPoints = camRotations.controlPoints();
 	rotationControllPoints.clear();
 
 	for (const auto& item : *camPath)
 	{
 		auto point = item.second;
+		auto thisRotator = point.rotation;
+		auto diffRotation = previousRotation.diffTo(thisRotator);
+
+		accumulatedPitch += diffRotation.Pitch._value;
+		accumulatedYaw += diffRotation.Yaw._value;
+		accumulatedRoll += diffRotation.Roll._value;
+
+		previousRotation = thisRotator;
+
 		rotationControllPoints.push_back(double(point.timeStamp));
-		rotationControllPoints.push_back(double(point.rotation.Pitch));
-		rotationControllPoints.push_back(double(point.rotation.Yaw));
-		rotationControllPoints.push_back(double(point.rotation.Roll));
+		rotationControllPoints.push_back(double(accumulatedPitch));
+		rotationControllPoints.push_back(double(accumulatedYaw));
+		rotationControllPoints.push_back(double(accumulatedRoll));
 	}
 	camRotations.setControlPoints(rotationControllPoints);
 }
