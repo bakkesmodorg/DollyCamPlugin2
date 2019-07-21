@@ -79,12 +79,12 @@ CameraSnapshot DollyCam::TakeSnapshot(bool saveToPath)
 		return save;
 
 	ReplayServerWrapper sw = gameWrapper->GetGameEventAsReplay();
+	auto replay = sw.GetReplay();
 	CameraWrapper flyCam = gameWrapper->GetCamera();
 	if (sw.IsNull())
 		return save;
-	
-	//save.timeStamp = sw.GetReplayTimeElapsed();
-	save.timeStamp = sw.GetCurrentReplayFrame()/30.f;
+
+	save.timeStamp = sw.GetCurrentReplayFrame()/replay.GetRecordFPS();
 	save.FOV = flyCam.GetFOV();
 	save.location = flyCam.GetLocation();
 	save.rotation = CustomRotator(flyCam.GetRotation());
