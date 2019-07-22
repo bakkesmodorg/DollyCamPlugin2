@@ -294,10 +294,12 @@ void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
 	if (command.compare("dolly_snapshot_list") == 0)
 	{
 		vector<int> frames = dollyCam->GetUsedFrames();
+		int index = 1;
 		for (auto it = frames.begin(); it != frames.end(); it++)
 		{
 			CameraSnapshot snapshot = dollyCam->GetSnapshot(*it);
-			cvarManager->log("ID: " + to_string(snapshot.frame) + ", [" + to_string_with_precision(snapshot.weight, 2) + "][" + to_string_with_precision(snapshot.timeStamp, 2) + "][" + to_string_with_precision(snapshot.FOV, 2) + "] (" + vector_to_string(snapshot.location) + ") (" + rotator_to_string(snapshot.rotation.ToRotator()) + " )");
+			cvarManager->log("(" + to_string(index) +  ") ID: " + to_string(snapshot.frame) + ", [" + to_string_with_precision(snapshot.weight, 2) + "][" + to_string_with_precision(snapshot.timeStamp, 2) + "][" + to_string_with_precision(snapshot.FOV, 2) + "] (" + vector_to_string(snapshot.location) + ") (" + rotator_to_string(snapshot.rotation.ToRotator()) + " )");
+			index++;
 		}
 		cvarManager->log("Current path has " + to_string(frames.size()) + " snapshots.");
 	} 
@@ -356,11 +358,11 @@ void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
 	else if (command.compare("dolly_snapshot_delete") == 0)
 	{
 		if (params.size() < 2) {
-			cvarManager->log("Usage: " + params.at(0) + " id");
+			cvarManager->log("Usage: " + params.at(0) + " index");
 			return;
 		}
-		int id = get_safe_int(params.at(1));
-		dollyCam->DeleteFrame(id);
+		int index = get_safe_int(params.at(1));
+		dollyCam->DeleteFrameByIndex(index);
 	}
 }
 

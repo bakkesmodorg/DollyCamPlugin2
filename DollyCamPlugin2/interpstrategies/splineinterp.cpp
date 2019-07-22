@@ -3,6 +3,33 @@
 #include "nbezierinterp.h"
 //#include "bakkesmod\wrappers\wrapperstructs.h"
 
+vector<tinyspline::real> SolveForT(tinyspline::BSpline &spline, float tGoal, float e, int maxSteps = 50)
+{
+	float uMin = 0;
+	float uMax = 1;
+
+	double u = (uMin + uMax) / 2;
+	auto res = spline.eval(u).result();
+	auto t = res[0];
+	float error = abs(t - tGoal);
+	int steps = 1;
+	while (error > e || steps > maxSteps)
+	{
+		if (t < tGoal) {
+			uMin = (uMin + uMax) / 2;
+		}
+		if (t > tGoal)
+		{
+			uMax = (uMin + uMax) / 2;
+		}
+		u = (uMin + uMax) / 2;
+		res = spline.eval(u).result();
+		t = res[0];
+		error = abs(t - tGoal);
+		steps++;
+	}
+	return res;
+}
 
 
 SplineInterpStrategy::SplineInterpStrategy(std::shared_ptr<savetype> _camPath, int degree)
@@ -13,7 +40,8 @@ SplineInterpStrategy::SplineInterpStrategy(std::shared_ptr<savetype> _camPath, i
 
 NewPOV SplineInterpStrategy::GetPOV(float gameTime, int latestFrame)
 {
-	auto t = GetRelativeTime(gameTime);
+	//auto t = GetRelativeTime(gameTime);
+	auto t = GetRelativeTimeFromFrame(latestFrame);
 
 
 	int n = camPath->size();
@@ -30,14 +58,22 @@ NewPOV SplineInterpStrategy::GetPOV(float gameTime, int latestFrame)
 	InitRotations(n);
 	InitFOVs(n);
 
-	auto posRes = camPositions.eval(t).result();
-	auto rotRes = camRotations.eval(t).result();
-	auto fovRes = camFOVs.eval(t).result();
+	//auto posRes = camPositions.eval(t).result();
+	//auto rotRes = camRotations.eval(t).result();
+	//auto fovRes = camFOVs.eval(t).result();	
+	auto posRes = SolveForT(camPositions, latestFrame, 0.1);
+	auto rotRes = SolveForT(camRotations, latestFrame, 0.1);
+	auto fovRes = SolveForT(camFOVs, latestFrame, 0.1);
 
 	Vector v;
 	v.X = float(posRes[1]);
 	v.Y = float(posRes[2]);
 	v.Z = float(posRes[3]);
+
+	if (latestFrame % 20 == 0)
+	{
+		cvarManager->log("frame: " + to_string(latestFrame) + " t: " + to_string(t) + "tSpline:" + to_string(posRes[0]));
+	}
 
 	float fov = float(fovRes[1]);
 
@@ -62,33 +98,45 @@ float SplineInterpStrategy::GetRelativeTime(float gameTime)
 	return t;
 }
 
+float SplineInterpStrategy::GetRelativeTimeFromFrame(int frame)
+{
+	auto startSnapshot = camPath->begin();
+	auto endSnapshot = (--camPath->end());
+
+	float startFrame = startSnapshot->second.frame;
+	float endFrame = endSnapshot->second.frame;
+
+	float totalFrames = endFrame - startFrame;
+	float relativeTime = (frame - startFrame) / totalFrames;
+	if (relativeTime < 0) return 0;
+	if (relativeTime > 1) return 1;
+	return relativeTime;
+}
+
 
 void SplineInterpStrategy::InitFOVs(int numberOfPoints)
 {
-	camFOVs = tinyspline::BSpline(numberOfPoints, 2);
+	auto POVs = vector<tinyspline::real>();
 
 	auto fovsControllPoints = camFOVs.controlPoints();
-	fovsControllPoints.clear();
 	for (const auto& item : *camPath)
 	{
 		auto point = item.second;
-		fovsControllPoints.push_back(double(point.timeStamp));
-		fovsControllPoints.push_back(double(point.FOV));
+		POVs.push_back(double(point.frame));
+		POVs.push_back(double(point.FOV));
 	}
-	camFOVs.setControlPoints(fovsControllPoints);
+	camFOVs = tinyspline::Utils::interpolateCubic(&POVs, 2);
 }
 
 void SplineInterpStrategy::InitRotations(int numberOfPoints)
 {
-	camRotations = tinyspline::BSpline(numberOfPoints, 4);
+	//(t, x, y, z)
+	auto rotations = vector<tinyspline::real>();
 
 	auto previousRotation = camPath->begin()->second.rotation;
 	float accumulatedPitch = previousRotation.Pitch._value;
 	float accumulatedYaw = previousRotation.Yaw._value;
 	float accumulatedRoll = previousRotation.Roll._value;
-
-	auto rotationControllPoints = camRotations.controlPoints();
-	rotationControllPoints.clear();
 
 	for (const auto& item : *camPath)
 	{
@@ -102,29 +150,26 @@ void SplineInterpStrategy::InitRotations(int numberOfPoints)
 
 		previousRotation = thisRotator;
 
-		rotationControllPoints.push_back(double(point.timeStamp));
-		rotationControllPoints.push_back(double(accumulatedPitch));
-		rotationControllPoints.push_back(double(accumulatedYaw));
-		rotationControllPoints.push_back(double(accumulatedRoll));
+		rotations.push_back(double(point.frame));
+		rotations.push_back(double(accumulatedPitch));
+		rotations.push_back(double(accumulatedYaw));
+		rotations.push_back(double(accumulatedRoll));
 	}
-	camRotations.setControlPoints(rotationControllPoints);
+
+	camRotations = tinyspline::Utils::interpolateCubic(&rotations, 4);
 }
 
 void SplineInterpStrategy::InitPositions(int numberOfPoints)
 {
 	//(t, x, y, z)
-	camPositions = tinyspline::BSpline(numberOfPoints, 4);
-
-	auto positions = camPositions.controlPoints();
-	positions.clear();
-
+	auto positions = vector<tinyspline::real>();
 	for (const auto& item : *camPath)
 	{
 		auto point = item.second;
-		positions.push_back(double(point.timeStamp));
+		positions.push_back(double(point.frame));
 		positions.push_back(double(point.location.X));
 		positions.push_back(double(point.location.Y));
 		positions.push_back(double(point.location.Z));
 	}
-	camPositions.setControlPoints(positions);
+	camPositions = tinyspline::Utils::interpolateCubic(&positions, 4);
 }

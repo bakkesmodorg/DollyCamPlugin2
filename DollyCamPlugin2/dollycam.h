@@ -39,7 +39,7 @@ public:
 	void InsertSnapshot(CameraSnapshot snapshot);
 	bool IsFrameUsed(int frame);
 	CameraSnapshot GetSnapshot(int frame);
-	void DeleteFrame(int frame);
+	void DeleteFrameByIndex(int frame);
 	vector<int> GetUsedFrames();
 	void SetRenderPath(bool render);
 	void SetRenderFrames(bool renderFrames);

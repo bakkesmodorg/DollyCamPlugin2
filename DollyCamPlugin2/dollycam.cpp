@@ -151,13 +151,22 @@ void DollyCam::Apply()
 	{
 		if (isFirst) {
 			diff = sw.GetSecondsElapsed();
+			
 			isFirst = false;
 		}
 	}
 	else {
 		isFirst = true;
 	}
-
+/*	auto replayServerWrapper = gameWrapper->GetGameEventAsReplay();
+	auto replay = gameWrapper->GetGameEventAsReplay().GetReplay();
+	float t = sw.GetSecondsElapsed() - diff + currentPath->begin()->second.timeStamp;
+	float timeFromFrames = replayServerWrapper.GetCurrentReplayFrame() / replay.GetRecordFPS();
+	float t2 = replayServerWrapper.GetReplayTimeElapsed();
+	float t3 = sw.GetReplayDirector().GetReplayTimeSeconds();
+	cvarManager->log("gameTime:" + to_string(t) + ", frameTime: " + to_string(timeFromFrames) + ", GetReplayTimeSeconds:" + to_string(t3) + ", replayServerTime:" + to_string(t2));
+	*/
+	//cvarManager->log("gameTime:" + to_string(t) + ", diff: " + to_string(diff) + ", sw:" + to_string(sw.GetSecondsElapsed()) + ", begin:" + to_string(currentPath->begin()->second.timeStamp) + ", frameTime: " + to_string(timeFromFrames));
 	NewPOV pov = locationInterpStrategy->GetPOV(sw.GetSecondsElapsed() - diff + currentPath->begin()->second.timeStamp, currentFrame);
 	if (!usesSameInterp)
 	{
@@ -202,11 +211,21 @@ CameraSnapshot DollyCam::GetSnapshot(int frame)
 	return snapshot;
 }
 
-void DollyCam::DeleteFrame(int frame)
+void DollyCam::DeleteFrameByIndex(int index)
 {
-	auto it = currentPath->find(frame);
-	if (it != currentPath->end())
-		this->currentPath->erase(it);
+	int i = 1;
+	auto it = currentPath->begin();
+	while (it != currentPath->end())
+	{
+		if (i == index)
+		{
+			int frame = it->second.frame;
+			currentPath->erase(it);
+			cvarManager->log("Deleted snapshot #" + to_string(index) + " with ID: " + to_string(frame));
+			break;
+		}
+		i++; it++;
+	}
 	this->RefreshInterpData();
 	this->RefreshInterpDataRotation();
 }
@@ -276,6 +295,7 @@ void DollyCam::Render(CanvasWrapper cw)
 		prevLine = line;
 	}
 
+	int index = 1;
 	for (auto it = currentPath->begin(); it != currentPath->end(); it++)
 	{
 		auto boxLoc = cw.Project(it->second.location);
@@ -287,9 +307,10 @@ void DollyCam::Render(CanvasWrapper cw)
 			auto tmp = Vector2();
 			tmp.X = 10; tmp.Y = 10;
 			cw.FillBox(tmp);
-			cw.SetColor(0, 0, 0, 255);
-			cw.DrawString(to_string(it->first) + " (w:" + to_string_with_precision(it->second.weight, 2) + ")");
+			cw.SetColor(255, 255, 255, 255);
+			cw.DrawString("(" + to_string(index) + ")" + " (ID:" + to_string(it->first) + ", w:" + to_string_with_precision(it->second.weight, 2) + ")");
 		}
+		index++;
 	}
 }
 
@@ -346,7 +367,9 @@ shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy(int interpStrategy)
 		return std::make_shared<CatmullRomInterpStrategy>(CatmullRomInterpStrategy(currentPath, chaikinDegree));
 		break;
 	case 5:
-		return std::make_shared<SplineInterpStrategy>(SplineInterpStrategy(currentPath, chaikinDegree));
+		auto tmp = std::make_shared<SplineInterpStrategy>(SplineInterpStrategy(currentPath, chaikinDegree));
+		tmp->cvarManager = cvarManager;
+		return tmp;
 	}
 
 	cvarManager->log("Interpstrategy not found!!! Defaulting to linear interp.");
