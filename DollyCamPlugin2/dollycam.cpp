@@ -84,7 +84,9 @@ CameraSnapshot DollyCam::TakeSnapshot(bool saveToPath)
 	if (sw.IsNull())
 		return save;
 
-	save.timeStamp = sw.GetCurrentReplayFrame()/replay.GetRecordFPS();
+
+	save.timeStamp = sw.GetReplayTimeElapsed();
+	//save.timeStamp = sw.GetCurrentReplayFrame()/replay.GetRecordFPS();
 	save.FOV = flyCam.GetFOV();
 	save.location = flyCam.GetLocation();
 	save.rotation = CustomRotator(flyCam.GetRotation());

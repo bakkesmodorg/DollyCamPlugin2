@@ -54,26 +54,19 @@ NewPOV SplineInterpStrategy::GetPOV(float gameTime, int latestFrame)
 	if (currentSnapshot == camPath->end() || nextSnapshot == camPath->end() || camPath->begin()->first > latestFrame || t > 1) //We're at the end of the playback
 		return{ Vector(0), CustomRotator(0,0,0), 0 };
 
+	//Could this be done in the constructor?
 	InitPositions(n);
 	InitRotations(n);
 	InitFOVs(n);
 
-	//auto posRes = camPositions.eval(t).result();
-	//auto rotRes = camRotations.eval(t).result();
-	//auto fovRes = camFOVs.eval(t).result();	
-	auto posRes = SolveForT(camPositions, latestFrame, 0.1);
-	auto rotRes = SolveForT(camRotations, latestFrame, 0.1);
-	auto fovRes = SolveForT(camFOVs, latestFrame, 0.1);
+	auto posRes = SolveForT(camPositions, gameTime, 0.0001);
+	auto rotRes = SolveForT(camRotations, gameTime, 0.0001);
+	auto fovRes = SolveForT(camFOVs, gameTime, 0.0001);
 
 	Vector v;
 	v.X = float(posRes[1]);
 	v.Y = float(posRes[2]);
 	v.Z = float(posRes[3]);
-
-	if (latestFrame % 20 == 0)
-	{
-		cvarManager->log("frame: " + to_string(latestFrame) + " t: " + to_string(t) + "tSpline:" + to_string(posRes[0]));
-	}
 
 	float fov = float(fovRes[1]);
 
@@ -122,7 +115,7 @@ void SplineInterpStrategy::InitFOVs(int numberOfPoints)
 	for (const auto& item : *camPath)
 	{
 		auto point = item.second;
-		POVs.push_back(double(point.frame));
+		POVs.push_back(double(point.timeStamp));
 		POVs.push_back(double(point.FOV));
 	}
 	camFOVs = tinyspline::Utils::interpolateCubic(&POVs, 2);
@@ -150,7 +143,7 @@ void SplineInterpStrategy::InitRotations(int numberOfPoints)
 
 		previousRotation = thisRotator;
 
-		rotations.push_back(double(point.frame));
+		rotations.push_back(double(point.timeStamp));
 		rotations.push_back(double(accumulatedPitch));
 		rotations.push_back(double(accumulatedYaw));
 		rotations.push_back(double(accumulatedRoll));
@@ -166,7 +159,7 @@ void SplineInterpStrategy::InitPositions(int numberOfPoints)
 	for (const auto& item : *camPath)
 	{
 		auto point = item.second;
-		positions.push_back(double(point.frame));
+		positions.push_back(double(point.timeStamp));
 		positions.push_back(double(point.location.X));
 		positions.push_back(double(point.location.Y));
 		positions.push_back(double(point.location.Z));
