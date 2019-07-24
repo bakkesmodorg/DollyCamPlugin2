@@ -18,7 +18,6 @@ namespace COLWIDTHS
 
 void DollyCamPlugin::Render()
 {
-	block_input = ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard;
 	ImGui::SetNextWindowSizeConstraints(ImVec2(COLWIDTHS::TOTAL, 600), ImVec2(FLT_MAX, FLT_MAX));
 
 	//setting bg alpha to 0.75
@@ -86,6 +85,7 @@ void DollyCamPlugin::Render()
 	{
 		cvarManager->executeCommand("togglemenu " + GetMenuName());
 	}
+	block_input = ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard;
 }
 
 std::string DollyCamPlugin::GetMenuName()
