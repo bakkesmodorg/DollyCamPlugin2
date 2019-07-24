@@ -27,13 +27,13 @@ void DollyCamPlugin::Render()
 	context->Style.Colors[bg_color_idx].w = 0.75;
 
 	string menuName = "Snapshots";
-	if (!ImGui::Begin(menuName.c_str(), &isWindowOpen))
-	{
-		// Early out if the window is collapsed, as an optimization.
-		ImGui::End();
-		return;
-	}
-	//ImGui::Begin(menuName.c_str(), &isWindowOpen, ImGuiWindowFlags_AlwaysAutoResize);
+	//if (!ImGui::Begin(menuName.c_str(), &isWindowOpen))
+	//{
+	//	// Early out if the window is collapsed, as an optimization.
+	//	ImGui::End();
+	//	return;
+	//}
+	ImGui::Begin(menuName.c_str(), &isWindowOpen);
 
 	ImGui::BeginChild("#CurrentSnapshotsTab", ImVec2(55 + 250 + 55 + 250, -ImGui::GetFrameHeightWithSpacing()));
 	ImGui::Columns(7, "snapshots"); 
@@ -110,7 +110,7 @@ bool DollyCamPlugin::ShouldBlockInput()
 
 bool DollyCamPlugin::IsActiveOverlay()
 {
-	return false;
+	return true;
 }
 
 void DollyCamPlugin::OnOpen()
