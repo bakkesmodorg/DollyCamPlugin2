@@ -25,6 +25,7 @@ private:
 	bool renderFrames = false;
 	void UpdateRenderPath();
 	void CheckIfSameInterp();
+
 public:
 	DollyCam(std::shared_ptr<GameWrapper> _gameWrapper, std::shared_ptr<CVarManagerWrapper> _cvarManager, std::shared_ptr<IGameApplier> _gameApplier);
 	~DollyCam();

@@ -4,16 +4,18 @@
 #include "bakkesmod\plugin\pluginwindow.h"
 #include "dollycam.h"
 
-class DollyCamPlugin : public BakkesMod::Plugin::BakkesModPlugin
-#ifdef PLUGIN_GUI
-	, public BakkesMod::Plugin::PluginWindow
-#endif
+class DollyCamPlugin : public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::Plugin::PluginWindow
 {
 private:
 	std::shared_ptr<DollyCam> dollyCam;
 	std::shared_ptr<bool> renderCameraPath;
 	CameraSnapshot selectedSnapshot;
 	bool IsApplicable();
+
+	//gui stuff
+	bool isWindowOpen = true;
+	bool isMinimized = false;
+
 public:
 	virtual void onLoad();
 	virtual void onUnload();
@@ -44,10 +46,14 @@ public:
 
 	//Interp config methods
 	void OnBezierCommand(vector<string> params);
-#ifdef PLUGIN_GUI
 	virtual void Render();
 	virtual std::string GetMenuName();
 	virtual std::string GetMenuTitle();
 	virtual void SetImGuiContext(uintptr_t ctx);
-#endif
+
+	// Inherited via PluginWindow
+	virtual bool ShouldBlockInput() override;
+	virtual bool IsActiveOverlay() override;
+	virtual void OnOpen() override;
+	virtual void OnClose() override;
 };

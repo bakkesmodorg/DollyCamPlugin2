@@ -1,0 +1,6 @@
+[submodule "DollyCamPlugin2/imguifilebrowser"]
+	path = DollyCamPlugin2/imguifilebrowser
+	url = https://github.com/bakkesmodorg/imgui-filebrowser
+[submodule "DollyCamPlugin2/json"]
+	path = DollyCamPlugin2/json
+	url = https://github.com/nlohmann/json.git

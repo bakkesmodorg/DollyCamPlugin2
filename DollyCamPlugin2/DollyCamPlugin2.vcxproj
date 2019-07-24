@@ -21,32 +21,32 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5FCE42A6-EC92-4C5F-A0B2-94FF138187A1}</ProjectGuid>
     <RootNamespace>DollyCamPlugin2</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -72,18 +72,25 @@
     <Import Project="customPaths.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\.intermediates\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\.intermediates\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Projects\BakkesMod\json\include;C:\Program Files %28x86%29\Steam\steamapps\common\rocketleague\Binaries\Win32\bakkesmod\bakkesmodsdk\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(BAKKESMOD)\bakkesmodsdk\include</AdditionalIncludeDirectories>
       <LanguageStandard>
       </LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Steam\steamapps\common\rocketleague\Binaries\Win32\bakkesmod\bakkesmodsdk\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(BAKKESMOD)\bakkesmodsdk\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -127,13 +134,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="imguifilebrowser\imfilebrowser.h" />
+    <ClInclude Include="imgui\CustomImguiModifications.h" />
+    <ClInclude Include="imgui\imconfig.h" />
+    <ClInclude Include="imgui\imgui.h" />
+    <ClInclude Include="imgui\imguivariouscontrols.h" />
+    <ClInclude Include="imgui\imgui_additions.h" />
+    <ClInclude Include="imgui\imgui_impl_dx9.h" />
+    <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="imgui\imgui_rangeslider.h" />
+    <ClInclude Include="imgui\imgui_tabs.h" />
+    <ClInclude Include="imgui\imgui_timeline.h" />
+    <ClInclude Include="imgui\stb_rect_pack.h" />
+    <ClInclude Include="imgui\stb_textedit.h" />
+    <ClInclude Include="imgui\stb_truetype.h" />
     <ClInclude Include="interpstrategies\catmullrominterp.h" />
     <ClInclude Include="dollycam.h" />
     <ClInclude Include="dollycamplugin.h" />
     <ClInclude Include="gameapplier.h" />
     <ClInclude Include="interpstrategies\interpstrategy.h" />
     <ClInclude Include="interpstrategies\linearinterp.h" />
-    <ClInclude Include="interpstrategies\Quaternions\quaternions.h" />
     <ClInclude Include="interpstrategies\supportedstrategies.h" />
     <ClInclude Include="interpstrategies\tinyspline\tinyspline.h" />
     <ClInclude Include="interpstrategies\tinyspline\tinysplinecpp.h" />
@@ -145,6 +165,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dollycamplugin_gui.cpp" />
+    <ClCompile Include="imgui\imgui.cpp" />
+    <ClCompile Include="imgui\imguivariouscontrols.cpp" />
+    <ClCompile Include="imgui\imgui_additions.cpp" />
+    <ClCompile Include="imgui\imgui_draw.cpp" />
+    <ClCompile Include="imgui\imgui_impl_dx9.cpp" />
+    <ClCompile Include="imgui\imgui_rangeslider.cpp" />
+    <ClCompile Include="imgui\imgui_tabs.cpp" />
+    <ClCompile Include="imgui\imgui_timeline.cpp" />
     <ClCompile Include="interpstrategies\catmullrominterp.cpp" />
     <ClCompile Include="dollycam.cpp" />
     <ClCompile Include="dollycamplugin.cpp" />
