@@ -18,14 +18,17 @@ namespace COLWIDTHS
 
 void DollyCamPlugin::Render()
 {
-	string menuName = "Snapshots";
+	block_input = ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard;
 	ImGui::SetNextWindowSizeConstraints(ImVec2(COLWIDTHS::TOTAL, 600), ImVec2(FLT_MAX, FLT_MAX));
 
+	//setting bg alpha to 0.75
 	auto context = ImGui::GetCurrentContext();
 	const ImGuiCol bg_color_idx = ImGuiCol_WindowBg;
-	const ImVec4 bg_color_backup = context->Style.Colors[bg_color_idx];
+	//const ImVec4 bg_color_backup = context->Style.Colors[bg_color_idx];
 	context->Style.Colors[bg_color_idx].w = 0.75;
-	if (!ImGui::Begin(menuName.c_str(), &isWindowOpen, ImGuiWindowFlags_NoCollapse))
+
+	string menuName = "Snapshots";
+	if (!ImGui::Begin(menuName.c_str(), &isWindowOpen))
 	{
 		// Early out if the window is collapsed, as an optimization.
 		ImGui::End();
@@ -102,7 +105,7 @@ void DollyCamPlugin::SetImGuiContext(uintptr_t ctx)
 
 bool DollyCamPlugin::ShouldBlockInput()
 {
-	return true;
+	return block_input;
 }
 
 bool DollyCamPlugin::IsActiveOverlay()

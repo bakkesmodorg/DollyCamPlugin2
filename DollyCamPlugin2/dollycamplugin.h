@@ -15,6 +15,7 @@ private:
 	//gui stuff
 	bool isWindowOpen = true;
 	bool isMinimized = false;
+	bool block_input = false;
 
 public:
 	virtual void onLoad();
