@@ -232,6 +232,29 @@ void DollyCam::DeleteFrameByIndex(int index)
 	this->RefreshInterpDataRotation();
 }
 
+bool DollyCam::ChangeFrame(const int oldFrame, const int newFrame)
+{
+	const auto it = currentPath->find(oldFrame);
+	if (it != currentPath->end())
+	{
+		currentPath->erase(it);
+
+		ReplayServerWrapper sw = gameWrapper->GetGameEventAsReplay();
+		auto replay = sw.GetReplay();
+		replay.SetCurrentFrame(newFrame);
+		auto newTimestamp = sw.GetReplayTimeElapsed();
+
+		it->second.frame = newFrame;
+		it->second.timeStamp = newTimestamp;
+		InsertSnapshot(it->second);
+
+		return true;
+	}
+	return false;
+
+
+}
+
 vector<int> DollyCam::GetUsedFrames()
 {
 	vector<int> frames = vector<int>();

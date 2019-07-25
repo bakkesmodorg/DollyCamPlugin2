@@ -41,6 +41,7 @@ public:
 	bool IsFrameUsed(int frame);
 	CameraSnapshot GetSnapshot(int frame);
 	void DeleteFrameByIndex(int frame);
+	bool ChangeFrame(int oldFrame, int newFrame);
 	vector<int> GetUsedFrames();
 	void SetRenderPath(bool render);
 	void SetRenderFrames(bool renderFrames);

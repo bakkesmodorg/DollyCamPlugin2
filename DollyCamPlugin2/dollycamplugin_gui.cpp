@@ -1,13 +1,10 @@
 #include "dollycamplugin.h"
-
 #include "imgui\imgui.h"
 #include "imgui\imgui_internal.h"
 #include "serialization.h"
 #include "bakkesmod\..\\utils\parser.h"
 #include <functional>
 #include <vector>
-
-
 
 namespace Columns
 {
@@ -40,7 +37,7 @@ namespace Columns
 		{"Location",	200,	true, false, [](CameraSnapshot snap, int i) {return vector_to_string(snap.location); },				noWidget},
 		{"Rotation",	140,	true, false, [](CameraSnapshot snap, int i) {return rotator_to_string(snap.rotation.ToRotator()); },noWidget},
 		{"FOV",			40,		true, false, [](CameraSnapshot snap, int i) {return to_string_with_precision(snap.FOV, 1); },		noWidget},
-		{"Remove",		60,		true, true, [](CameraSnapshot snap, int i) {return ""; },
+		{"Remove",		80,		true, true, [](CameraSnapshot snap, int i) {return ""; },
 			[](std::shared_ptr<DollyCam> dollyCam, CameraSnapshot snap, int i) {
 				string buttonIdentifier = "Remove##" + to_string(i);
 				if (ImGui::Button(buttonIdentifier.c_str()))
@@ -56,7 +53,7 @@ void DollyCamPlugin::Render()
 {
 	auto columns = Columns::column;
 	int totalWidth = std::accumulate(columns.begin(), columns.end(), 0, [](int sum, const Columns::TableColumns& element) {return sum + element.GetWidth(); });
-	ImGui::SetNextWindowSizeConstraints(ImVec2(totalWidth, 600), ImVec2(FLT_MAX, FLT_MAX));
+	ImGui::SetNextWindowSizeConstraints(ImVec2(totalWidth, 300), ImVec2(FLT_MAX, FLT_MAX));
 
 	//setting bg alpha to 0.75
 	auto context = ImGui::GetCurrentContext();
@@ -64,7 +61,7 @@ void DollyCamPlugin::Render()
 	context->Style.Colors[bg_color_idx].w = 0.75;
 
 	string menuName = "Snapshots";
-	if (!ImGui::Begin(menuName.c_str(), &isWindowOpen))
+	if (!ImGui::Begin(menuName.c_str(), &isWindowOpen, ImGuiWindowFlags_ResizeFromAnySide))
 	{
 		// Early out if the window is collapsed, as an optimization.
 		block_input = ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard;
@@ -73,7 +70,7 @@ void DollyCamPlugin::Render()
 	}
 
 	int enabledCount = std::accumulate(columns.begin(), columns.end(), 0, [](int sum, const Columns::TableColumns& element) {return sum + element.enabled; });
-	ImGui::BeginChild("#CurrentSnapshotsTab", ImVec2(55 + 250 + 55 + 250, -ImGui::GetFrameHeightWithSpacing()));
+	ImGui::BeginChild("#CurrentSnapshotsTab", ImVec2(totalWidth, -ImGui::GetFrameHeightWithSpacing()));
 	ImGui::Columns(enabledCount, "snapshots");
 
 	//Set column widths 
@@ -90,7 +87,7 @@ void DollyCamPlugin::Render()
 	ImGui::Separator();
 
 	//Set column headers
-	for (auto& col : columns)
+	for (const auto& col : columns)
 	{
 		if (col.enabled)
 		{
@@ -107,7 +104,7 @@ void DollyCamPlugin::Render()
 	for (const auto& data : *dollyCam->GetCurrentPath())
 	{
 		auto snapshot = data.second;
-		for (auto& col : columns)
+		for (const auto& col : columns)
 		{
 			if (col.enabled)
 			{
