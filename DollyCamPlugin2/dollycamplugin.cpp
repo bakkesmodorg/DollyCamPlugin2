@@ -36,11 +36,11 @@ void DollyCamPlugin::onLoad()
 	gameWrapper->HookEvent("Function TAGame.GFxHUD_Replay_TA.Destroyed", bind(&DollyCamPlugin::onReplayClose, this, _1));
 	
 
-	cvarManager->registerCvar("dolly_interpmode", "0", "Used interp mode", true, true, 0, true, 2000).addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
+	cvarManager->registerCvar("dolly_interpmode", "5", "Used interp mode", true, true, 0, true, 2000).addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
 	
-	cvarManager->registerCvar("dolly_interpmode_location", "0", "Used interp mode for location", true, true, 0, true, 2000)
+	cvarManager->registerCvar("dolly_interpmode_location", "5", "Used interp mode for location", true, true, 0, true, 2000)
 		.addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
-	cvarManager->registerCvar("dolly_interpmode_rotation", "0", "Used interp mode for rotation", true, true, 0, true, 2000)
+	cvarManager->registerCvar("dolly_interpmode_rotation", "5", "Used interp mode for rotation", true, true, 0, true, 2000)
 		.addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
 
 	

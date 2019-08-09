@@ -59,9 +59,11 @@ NewPOV SplineInterpStrategy::GetPOV(float gameTime, int latestFrame)
 	InitRotations(n);
 	InitFOVs(n);
 
-	auto posRes = SolveForT(camPositions, gameTime, 0.0001);
-	auto rotRes = SolveForT(camRotations, gameTime, 0.0001);
-	auto fovRes = SolveForT(camFOVs, gameTime, 0.0001);
+	float epsilon = 0.004; // Acceptable error is 1 / 240 seconds.
+	auto posRes = camPositions.bisect(gameTime, epsilon).result();
+	auto rotRes = camRotations.bisect(gameTime, epsilon).result();
+	auto fovRes = camFOVs.bisect(gameTime, epsilon).result();
+
 
 	Vector v;
 	v.X = float(posRes[1]);
@@ -71,7 +73,6 @@ NewPOV SplineInterpStrategy::GetPOV(float gameTime, int latestFrame)
 	float fov = float(fovRes[1]);
 
 	CustomRotator rot = CustomRotator(float(rotRes[1]), float(rotRes[2]), float(rotRes[3]));
-
 	return {v, rot, fov};
 }
 

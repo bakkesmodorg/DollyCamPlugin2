@@ -148,7 +148,6 @@ void DollyCam::Apply()
 	}
 	if (currentFrame < currentPath->begin()->first || currentFrame >(--currentPath->end())->first)
 		return;
-	//cvarManager->log("Frame: " + to_string(currentFrame) + ". Replay time: " + to_string(sw.GetReplayTimeElapsed()));
 	if (currentFrame == currentPath->begin()->first)
 	{
 		if (isFirst) {
@@ -160,15 +159,7 @@ void DollyCam::Apply()
 	else {
 		isFirst = true;
 	}
-	/*	auto replayServerWrapper = gameWrapper->GetGameEventAsReplay();
-		auto replay = gameWrapper->GetGameEventAsReplay().GetReplay();
-		float t = sw.GetSecondsElapsed() - diff + currentPath->begin()->second.timeStamp;
-		float timeFromFrames = replayServerWrapper.GetCurrentReplayFrame() / replay.GetRecordFPS();
-		float t2 = replayServerWrapper.GetReplayTimeElapsed();
-		float t3 = sw.GetReplayDirector().GetReplayTimeSeconds();
-		cvarManager->log("gameTime:" + to_string(t) + ", frameTime: " + to_string(timeFromFrames) + ", GetReplayTimeSeconds:" + to_string(t3) + ", replayServerTime:" + to_string(t2));
-		*/
-		//cvarManager->log("gameTime:" + to_string(t) + ", diff: " + to_string(diff) + ", sw:" + to_string(sw.GetSecondsElapsed()) + ", begin:" + to_string(currentPath->begin()->second.timeStamp) + ", frameTime: " + to_string(timeFromFrames));
+
 	NewPOV pov = locationInterpStrategy->GetPOV(sw.GetSecondsElapsed() - diff + currentPath->begin()->second.timeStamp, currentFrame);
 	if (!usesSameInterp)
 	{

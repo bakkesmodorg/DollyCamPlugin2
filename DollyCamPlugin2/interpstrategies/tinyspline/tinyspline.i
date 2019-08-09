@@ -35,6 +35,10 @@
 	dimension,
 	dimension);
 %attributeval(tinyspline::BSpline,
+	tinyspline::Domain,
+	domain,
+	domain);
+%attributeval(tinyspline::BSpline,
 	std::vector<tinyspline::real>,
 	controlPoints,
 	controlPoints,
@@ -44,6 +48,14 @@
 	knots,
 	knots,
 	setKnots);
+%attribute(tinyspline::Domain,
+	tinyspline::real,
+	min,
+	min);
+%attribute(tinyspline::Domain,
+	tinyspline::real,
+	max,
+	max);
 %attribute(tinyspline::DeBoorNet,
 	tinyspline::real,
 	knot,
@@ -79,6 +91,7 @@
 
 // Ignore wrapped structs and data fields.
 %ignore tsError;
+%ignore tsStatus;
 %ignore tsDeBoorNet;
 %ignore tinyspline::DeBoorNet::data;
 %ignore tsBSpline;
@@ -89,7 +102,6 @@
 %rename(OPENED) TS_OPENED;
 %rename(CLAMPED) TS_CLAMPED;
 %rename(BEZIERS) TS_BEZIERS;
-%rename(NONE) TS_NONE;
 
 %{
 	#include "tinyspline.h"

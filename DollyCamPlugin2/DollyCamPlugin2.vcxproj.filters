@@ -125,6 +125,9 @@
     <ClInclude Include="imgui\imguivariouscontrols.h">
       <Filter>imgui\headers</Filter>
     </ClInclude>
+    <ClInclude Include="interpstrategies\tinyspline\parson.h">
+      <Filter>InterpolationStrategies\Spline\TinySpline</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dollycamplugin.cpp">
@@ -189,6 +192,9 @@
     </ClCompile>
     <ClCompile Include="imgui\imguivariouscontrols.cpp">
       <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="interpstrategies\tinyspline\parson.c">
+      <Filter>InterpolationStrategies\Spline\TinySpline</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

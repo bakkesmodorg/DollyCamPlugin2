@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -108,8 +108,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(BAKKESMOD)\bakkesmodsdk\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PreprocessorDefinitions>_WINDLL;NOMINMAX;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -155,6 +155,7 @@
     <ClInclude Include="interpstrategies\interpstrategy.h" />
     <ClInclude Include="interpstrategies\linearinterp.h" />
     <ClInclude Include="interpstrategies\supportedstrategies.h" />
+    <ClInclude Include="interpstrategies\tinyspline\parson.h" />
     <ClInclude Include="interpstrategies\tinyspline\tinyspline.h" />
     <ClInclude Include="interpstrategies\tinyspline\tinysplinecpp.h" />
     <ClInclude Include="models.h" />
@@ -180,6 +181,7 @@
     <ClCompile Include="interpstrategies\interpstrategy.cpp" />
     <ClCompile Include="interpstrategies\linearinterp.cpp" />
     <ClCompile Include="interpstrategies\splineinterp.cpp" />
+    <ClCompile Include="interpstrategies\tinyspline\parson.c" />
     <ClCompile Include="interpstrategies\tinyspline\tinyspline.c" />
     <ClCompile Include="interpstrategies\tinyspline\tinysplinecpp.cpp" />
     <ClCompile Include="models.cpp" />
