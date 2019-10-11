@@ -58,8 +58,8 @@ NewPOV SplineInterpStrategy::GetPOV(float gameTime, int latestFrame)
 	InitPositions(n);
 	InitRotations(n);
 	InitFOVs(n);
-
-	float epsilon = 0.001; // Acceptable error is 1 / 1000 seconds.
+	int accuracy = cvarManager->getCvar("dolly_spline_acc").getIntValue();
+	float epsilon = 1.0 / accuracy; // Acceptable error is 1 / 1000 seconds.
 	auto posRes = camPositions.bisect(gameTime, epsilon).result();
 	auto rotRes = camRotations.bisect(gameTime, epsilon).result();
 	auto fovRes = camFOVs.bisect(gameTime, epsilon).result();

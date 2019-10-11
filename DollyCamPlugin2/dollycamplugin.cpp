@@ -77,7 +77,7 @@ void DollyCamPlugin::onLoad()
 
 	cvarManager->registerNotifier("dolly_bezier_weight", bind(&DollyCamPlugin::OnBezierCommand, this, _1), "Change bezier weight of given snapshot (Unsupported?). Usage: dolly_bezier_weight", PERMISSION_ALL);
 	cvarManager->registerCvar("dolly_chaikin_degree", "0", "Amount of times to apply chaikin to the spline", true, true, 0, true, 20).addOnValueChanged(bind(&DollyCamPlugin::OnChaikinChanged, this, _1, _2));;
-
+	cvarManager->registerCvar("dolly_spline_acc", "1000", "Spline interpolation time accuracy", true, true, 100, false);
 	dollyCam->SetRenderPath(true);
 }
 
