@@ -25,6 +25,7 @@ private:
 	bool renderFrames = false;
 	void UpdateRenderPath();
 	void CheckIfSameInterp();
+
 public:
 	DollyCam(std::shared_ptr<GameWrapper> _gameWrapper, std::shared_ptr<CVarManagerWrapper> _cvarManager, std::shared_ptr<IGameApplier> _gameApplier);
 	~DollyCam();
@@ -39,7 +40,8 @@ public:
 	void InsertSnapshot(CameraSnapshot snapshot);
 	bool IsFrameUsed(int frame);
 	CameraSnapshot GetSnapshot(int frame);
-	void DeleteFrame(int frame);
+	void DeleteFrameByIndex(int frame);
+	bool ChangeFrame(int oldFrame, int newFrame);
 	vector<int> GetUsedFrames();
 	void SetRenderPath(bool render);
 	void SetRenderFrames(bool renderFrames);

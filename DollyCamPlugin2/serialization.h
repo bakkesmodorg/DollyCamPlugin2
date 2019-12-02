@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "bakkesmod\wrappers\wrapperstructs.h"
-#include "nlohmann/json.hpp"
+#include "json\single_include\nlohmann\json.hpp"
 #include "models.h"
 std::string vector_to_string(Vector v);
 

@@ -3,3 +3,4 @@
 #include "linearinterp.h"
 #include "nbezierinterp.h"
 #include "catmullrominterp.h"
+#include "splineinterp.h"

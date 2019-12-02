@@ -9,9 +9,35 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="InterpolationStrategies">
+      <UniqueIdentifier>{a8c0340c-7fff-40c5-96bb-efefbc55ebe0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InterpolationStrategies\Bezier">
+      <UniqueIdentifier>{fba5f218-c4dc-4b21-906e-1cbedc0217e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InterpolationStrategies\Linear">
+      <UniqueIdentifier>{59abff23-ba54-48c8-8952-fc951928a091}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InterpolationStrategies\CatMull">
+      <UniqueIdentifier>{03ced2a0-aa8e-487e-b40c-9a096a90d3f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InterpolationStrategies\Spline">
+      <UniqueIdentifier>{6da9d689-b1b1-4ac0-b237-e14834b5cf1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InterpolationStrategies\Spline\TinySpline">
+      <UniqueIdentifier>{7a7175c8-1722-4828-98bd-2515024526e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Serialization">
+      <UniqueIdentifier>{c3ccd069-a373-4ca0-8bb2-78a8adafa3ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Serialization\json">
+      <UniqueIdentifier>{69d788ea-46e4-4818-ac5b-7a6e87790e96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{c9a14db7-8bd5-4893-a227-c0c223cee53b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui\headers">
+      <UniqueIdentifier>{9fc89af7-9494-4546-ad6f-de25fcc463e6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -27,59 +53,80 @@
     <ClInclude Include="models.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="serialization.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="interpstrategies\interpstrategy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="interpstrategies\linearinterp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="interpstrategies\nbezierinterp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="interpstrategies\supportedstrategies.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="interpstrategies\splineinterp.h">
+      <Filter>InterpolationStrategies\Spline</Filter>
+    </ClInclude>
+    <ClInclude Include="interpstrategies\tinyspline\tinyspline.h">
+      <Filter>InterpolationStrategies\Spline\TinySpline</Filter>
+    </ClInclude>
+    <ClInclude Include="interpstrategies\tinyspline\tinysplinecpp.h">
+      <Filter>InterpolationStrategies\Spline\TinySpline</Filter>
+    </ClInclude>
+    <ClInclude Include="interpstrategies\nbezierinterp.h">
+      <Filter>InterpolationStrategies\Bezier</Filter>
+    </ClInclude>
+    <ClInclude Include="interpstrategies\linearinterp.h">
+      <Filter>InterpolationStrategies\Linear</Filter>
+    </ClInclude>
+    <ClInclude Include="interpstrategies\interpstrategy.h">
+      <Filter>InterpolationStrategies</Filter>
+    </ClInclude>
     <ClInclude Include="interpstrategies\catmullrominterp.h">
-      <Filter>Header Files</Filter>
+      <Filter>InterpolationStrategies\CatMull</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imconfig.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="serialization.h">
+      <Filter>Serialization</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="nlohmann\json.hpp">
+      <Filter>Serialization\json</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_additions.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imguifilebrowser\imfilebrowser.h">
+      <Filter>imgui\headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_impl_dx9.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imgui\stb_rect_pack.h">
+      <Filter>imgui\headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_internal.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imgui\stb_textedit.h">
+      <Filter>imgui\headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_rangeslider.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imgui\stb_truetype.h">
+      <Filter>imgui\headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_tabs.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imgui\CustomImguiModifications.h">
+      <Filter>imgui\headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_timeline.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imgui\imconfig.h">
+      <Filter>imgui\headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imguivariouscontrols.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imgui\imgui.h">
+      <Filter>imgui\headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\stb_rect_pack.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imgui\imgui_additions.h">
+      <Filter>imgui\headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\stb_textedit.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imgui\imgui_impl_dx9.h">
+      <Filter>imgui\headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\stb_truetype.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imgui\imgui_internal.h">
+      <Filter>imgui\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_rangeslider.h">
+      <Filter>imgui\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_tabs.h">
+      <Filter>imgui\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_timeline.h">
+      <Filter>imgui\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imguivariouscontrols.h">
+      <Filter>imgui\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="interpstrategies\tinyspline\parson.h">
+      <Filter>InterpolationStrategies\Spline\TinySpline</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -95,47 +142,64 @@
     <ClCompile Include="models.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="serialization.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="interpstrategies\interpstrategy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="interpstrategies\linearinterp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="interpstrategies\nbezierinterp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="interpstrategies\catmullrominterp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="dollycamplugin_gui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="interpstrategies\catmullrominterp.cpp">
+      <Filter>InterpolationStrategies\CatMull</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_additions.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="interpstrategies\interpstrategy.cpp">
+      <Filter>InterpolationStrategies</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_draw.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="interpstrategies\linearinterp.cpp">
+      <Filter>InterpolationStrategies\Linear</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_impl_dx9.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="interpstrategies\nbezierinterp.cpp">
+      <Filter>InterpolationStrategies\Bezier</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_rangeslider.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="interpstrategies\splineinterp.cpp">
+      <Filter>InterpolationStrategies\Spline</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_tabs.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="interpstrategies\tinyspline\tinyspline.c">
+      <Filter>InterpolationStrategies\Spline\TinySpline</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imgui_timeline.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="interpstrategies\tinyspline\tinysplinecpp.cpp">
+      <Filter>InterpolationStrategies\Spline\TinySpline</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\BakkesMod-rewrite\BakkesMod Rewrite\bakkesmod\gui\imgui\imguivariouscontrols.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="serialization.cpp">
+      <Filter>Serialization</Filter>
     </ClCompile>
+    <ClCompile Include="imgui\imgui.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_additions.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_draw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_impl_dx9.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_rangeslider.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_tabs.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_timeline.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imguivariouscontrols.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="interpstrategies\tinyspline\parson.c">
+      <Filter>InterpolationStrategies\Spline\TinySpline</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="interpstrategies\tinyspline\tinyspline.i">
+      <Filter>InterpolationStrategies\Spline\TinySpline</Filter>
+    </None>
   </ItemGroup>
 </Project>
