@@ -31,22 +31,22 @@ public:
 	void onRender(CanvasWrapper canvas);
 
 	//Console command handlers
-	void OnAllCommand(vector<string> params);
-	void OnCamCommand(vector<string> params);
-	void OnInReplayCommand(vector<string> params);
-	void OnReplayCommand(vector<string> params);
-	void OnSnapshotCommand(vector<string> params);
-	void OnSnapshotModifyCommand(vector<string> params);
+	void OnAllCommand(std::vector<std::string> params);
+	void OnCamCommand(std::vector<std::string> params);
+	void OnInReplayCommand(std::vector<std::string> params);
+	void OnReplayCommand(std::vector<std::string> params);
+	void OnSnapshotCommand(std::vector<std::string> params);
+	void OnSnapshotModifyCommand(std::vector<std::string> params);
 
-	void OnLiveCommand(vector<string> params);
+	void OnLiveCommand(std::vector<std::string> params);
 
 	//Cvar change listeners
-	void OnInterpModeChanged(string oldValue, CVarWrapper newCvar);
-	void OnRenderFramesChanged(string oldValue, CVarWrapper newCvar);
-	void OnChaikinChanged(string oldValue, CVarWrapper newCvar);
+	void OnInterpModeChanged(std::string oldValue, CVarWrapper newCvar);
+	void OnRenderFramesChanged(std::string oldValue, CVarWrapper newCvar);
+	void OnChaikinChanged(std::string oldValue, CVarWrapper newCvar);
 
 	//Interp config methods
-	void OnBezierCommand(vector<string> params);
+	void OnBezierCommand(std::vector<std::string> params);
 	virtual void Render();
 	virtual std::string GetMenuName();
 	virtual std::string GetMenuTitle();

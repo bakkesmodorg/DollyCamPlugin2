@@ -21,9 +21,9 @@ NewPOV RealGameApplier::GetPOV()
 }
 
 
-MockGameApplier::MockGameApplier(string filename)
+MockGameApplier::MockGameApplier(std::string filename)
 {
-	output.open(filename, ios::out | ios::trunc);
+	output.open(filename, std::ios::out | std::ios::trunc);
 }
 
 MockGameApplier::~MockGameApplier()
@@ -41,7 +41,7 @@ void MockGameApplier::SetPOV(Vector location, CustomRotator rotation, float FOV)
 {
 	NewPOV newpov = { location, rotation, FOV };
 	pov = newpov;
-	output << time << "," << location.X << "," << location.Y << "," << location.Z << endl;
+	output << time << "," << location.X << "," << location.Y << "," << location.Z << std::endl;
 }
 
 NewPOV MockGameApplier::GetPOV()

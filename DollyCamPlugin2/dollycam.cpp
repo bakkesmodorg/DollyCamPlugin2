@@ -6,13 +6,13 @@
 
 #include "interpstrategies\supportedstrategies.h"
 #include "serialization.h"
-
+#include <fstream>
 
 void DollyCam::UpdateRenderPath()
 {
 	if (!gameWrapper->IsInReplay())
 		return;
-	currentRenderPath = make_shared<savetype>(savetype());
+	currentRenderPath = std::make_shared<savetype>(savetype());
 	CVarWrapper interpMode = cvarManager->getCvar("dolly_interpmode_location");
 	auto locationRenderStrategy = CreateInterpStrategy(interpMode.getIntValue());
 	auto firstFrame = currentPath->begin();
@@ -50,7 +50,7 @@ void DollyCam::UpdateRenderPath()
 		snapshot.FOV = pov.FOV;
 
 		if (snapshot.FOV > 1)
-			currentRenderPath->insert(make_pair(i, snapshot));
+			currentRenderPath->insert(std::make_pair(i, snapshot));
 
 	}
 }
@@ -132,22 +132,32 @@ float diff = .0f;
 bool isFirst = true;
 void DollyCam::Apply()
 {
+	cvarManager->log("Wa: ");
 	int currentFrame = 0;
 	ServerWrapper sw(NULL);
-	if (gameWrapper->IsInReplay()) {
+	if (gameWrapper->IsInReplay())
+	{
 		currentFrame = gameWrapper->GetGameEventAsReplay().GetCurrentReplayFrame();
 		sw = gameWrapper->GetGameEventAsReplay();
 	}
-	else if (gameWrapper->IsInGame()) {
+	else if (gameWrapper->IsInGame())
+	{
 		sw = gameWrapper->GetGameEventAsServer();
+		currentFrame = sw.GetReplayDirector().GetReplay().GetCurrentFrame();
+	}
+	else if (gameWrapper->IsInOnlineGame())
+	{
+		sw = gameWrapper->GetOnlineGame();
 		currentFrame = sw.GetReplayDirector().GetReplay().GetCurrentFrame();
 	}
 	else
 	{
 		return;
 	}
+	cvarManager->log("Frame: " + std::to_string(currentFrame));
 	if (currentFrame < currentPath->begin()->first || currentFrame >(--currentPath->end())->first)
 		return;
+	cvarManager->log("Can play: ");
 	if (currentFrame == currentPath->begin()->first)
 	{
 		if (isFirst) {
@@ -159,7 +169,7 @@ void DollyCam::Apply()
 	else {
 		isFirst = true;
 	}
-
+	
 	NewPOV pov = locationInterpStrategy->GetPOV(sw.GetSecondsElapsed() - diff + currentPath->begin()->second.timeStamp, currentFrame);
 	if (!usesSameInterp)
 	{
@@ -170,6 +180,7 @@ void DollyCam::Apply()
 	if (pov.FOV < 1) { //Invalid camerastate
 		return;
 	}
+	cvarManager->log("Applying: ");
 	gameApplier->SetPOV(pov.location, pov.rotation, pov.FOV);
 	//flyCam.SetPOV(pov.ToPOV());
 }
@@ -214,7 +225,7 @@ void DollyCam::DeleteFrameByIndex(int index)
 		{
 			int frame = it->second.frame;
 			currentPath->erase(it);
-			cvarManager->log("Deleted snapshot #" + to_string(index) + " with ID: " + to_string(frame));
+			cvarManager->log("Deleted snapshot #" + std::to_string(index) + " with ID: " + std::to_string(frame));
 			break;
 		}
 		i++; it++;
@@ -246,9 +257,9 @@ bool DollyCam::ChangeFrame(const int oldFrame, const int newFrame)
 
 }
 
-vector<int> DollyCam::GetUsedFrames()
+std::vector<int> DollyCam::GetUsedFrames()
 {
-	vector<int> frames = vector<int>();
+	std::vector<int> frames = std::vector<int>();
 	for (auto it = currentPath->begin(); it != currentPath->end(); it++)
 	{
 		frames.push_back(it->first);
@@ -299,10 +310,10 @@ void DollyCam::Render(CanvasWrapper cw)
 			colTest = colTest == 0 ? 255 : 255;
 		}
 
-		line.X = max(0, line.X);
-		line.X = min(line.X, canvasSize.X);
-		line.Y = max(0, line.Y);
-		line.Y = min(line.Y, canvasSize.Y);
+		line.X = std::max(0, line.X);
+		line.X = std::min(line.X, canvasSize.X);
+		line.Y = std::max(0, line.Y);
+		line.Y = std::min(line.Y, canvasSize.Y);
 		bool inFrustum = false;
 		Vector cam_to_line = (it->second.location - location);
 		cam_to_line.normalize();
@@ -317,7 +328,7 @@ void DollyCam::Render(CanvasWrapper cw)
 				if (renderFrames) {
 					cw.SetColor(0, 0, 0, 255);
 					cw.SetPosition(line);
-					cw.DrawString(to_string(it->first));
+					cw.DrawString(std::to_string(it->first));
 				}
 			}
 		}
@@ -343,7 +354,7 @@ void DollyCam::Render(CanvasWrapper cw)
 				tmp.X = 10; tmp.Y = 10;
 				cw.FillBox(tmp);
 				cw.SetColor(255, 255, 255, 255);
-				cw.DrawString("(" + to_string(index) + ")" + " (ID:" + to_string(it->first) + ", w:" + to_string_with_precision(it->second.weight, 2) + ")");
+				cw.DrawString("(" + std::to_string(index) + ")" + " (ID:" + std::to_string(it->first) + ", w:" + to_string_with_precision(it->second.weight, 2) + ")");
 			}
 		}
 		index++;
@@ -369,7 +380,7 @@ void DollyCam::RefreshInterpDataRotation()
 	CheckIfSameInterp();
 }
 
-string DollyCam::GetInterpolationMethod(bool locationInterp)
+std::string DollyCam::GetInterpolationMethod(bool locationInterp)
 {
 	if (locationInterp && locationInterpStrategy)
 		return locationInterpStrategy->GetName();
@@ -380,7 +391,7 @@ string DollyCam::GetInterpolationMethod(bool locationInterp)
 
 
 
-shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy(int interpStrategy)
+std::shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy(int interpStrategy)
 {
 
 	int chaikinDegree = cvarManager->getCvar("dolly_chaikin_degree").getIntValue();
@@ -412,30 +423,30 @@ shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy(int interpStrategy)
 	return std::make_shared<LinearInterpStrategy>(LinearInterpStrategy(currentPath, chaikinDegree));
 }
 
-void DollyCam::SaveToFile(string filename)
+void DollyCam::SaveToFile(std::string filename)
 {
-	std::map<string, CameraSnapshot> pathCopy;
+	std::map<std::string, CameraSnapshot> pathCopy;
 	for (auto& i : *currentPath)
 	{
-		pathCopy.insert_or_assign(to_string(i.first), i.second);
+		pathCopy.insert_or_assign(std::to_string(i.first), i.second);
 	}
 	json j = pathCopy;
-	ofstream myfile;
+	std::ofstream myfile;
 	myfile.open(filename);
 	myfile << j.dump(4);
 	myfile.close();
 }
 
-void DollyCam::LoadFromFile(string filename)
+void DollyCam::LoadFromFile(std::string filename)
 {
 	std::ifstream i(filename);
 	json j;
 	i >> j;
 	currentPath->clear();
-	auto v8 = j.get<std::map<string, CameraSnapshot>>();
+	auto v8 = j.get<std::map<std::string, CameraSnapshot>>();
 	for (auto& i : v8)
 	{
-		string first = i.first;
+		std::string first = i.first;
 		int intVal = get_safe_int(first);
 		CameraSnapshot value = i.second;
 		currentPath->insert_or_assign(intVal, value);

@@ -3,7 +3,7 @@
 #include "nbezierinterp.h"
 //#include "bakkesmod\wrappers\wrapperstructs.h"
 
-vector<tinyspline::real> SolveForT(tinyspline::BSpline &spline, float tGoal, float e, int maxSteps = 50)
+std::vector<tinyspline::real> SolveForT(tinyspline::BSpline &spline, float tGoal, float e, int maxSteps = 50)
 {
 	float uMin = 0;
 	float uMax = 1;
@@ -110,7 +110,7 @@ float SplineInterpStrategy::GetRelativeTimeFromFrame(int frame)
 
 void SplineInterpStrategy::InitFOVs(int numberOfPoints)
 {
-	auto POVs = vector<tinyspline::real>();
+	auto POVs = std::vector<tinyspline::real>();
 
 	auto fovsControllPoints = camFOVs.controlPoints();
 	for (const auto& item : *camPath)
@@ -125,7 +125,7 @@ void SplineInterpStrategy::InitFOVs(int numberOfPoints)
 void SplineInterpStrategy::InitRotations(int numberOfPoints)
 {
 	//(t, x, y, z)
-	auto rotations = vector<tinyspline::real>();
+	auto rotations = std::vector<tinyspline::real>();
 
 	auto previousRotation = camPath->begin()->second.rotation;
 	float accumulatedPitch = previousRotation.Pitch._value;
@@ -156,7 +156,7 @@ void SplineInterpStrategy::InitRotations(int numberOfPoints)
 void SplineInterpStrategy::InitPositions(int numberOfPoints)
 {
 	//(t, x, y, z)
-	auto positions = vector<tinyspline::real>();
+	auto positions = std::vector<tinyspline::real>();
 	for (const auto& item : *camPath)
 	{
 		auto point = item.second;

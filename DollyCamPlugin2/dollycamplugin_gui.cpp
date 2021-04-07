@@ -5,16 +5,17 @@
 #include "bakkesmod\..\\utils\parser.h"
 #include <functional>
 #include <vector>
+#include <algorithm>
 
 namespace Columns
 {
 	struct TableColumns
 	{
-		string header;
+		std::string header;
 		int width;
 		bool enabled;
 		bool widget;
-		std::function<string(CameraSnapshot, int)> ToString;
+		std::function<std::string(CameraSnapshot, int)> ToString;
 		std::function<void(std::shared_ptr<DollyCam>, CameraSnapshot, int)> WidgetCode;
 
 		int GetWidth() const { return enabled ? width : 0; }
@@ -30,16 +31,16 @@ namespace Columns
 		}
 	};
 	auto noWidget = [](std::shared_ptr<DollyCam> dollyCam, CameraSnapshot snap, int i) {};
-	vector< TableColumns > column {
-		{"#",			25,		true, false, [](CameraSnapshot snap, int i) {return to_string(i); },								noWidget},
-		{"Frame",		40,		true, false, [](CameraSnapshot snap, int i) {return to_string(snap.frame); },						noWidget},
+	std::vector< TableColumns > column {
+		{"#",			25,		true, false, [](CameraSnapshot snap, int i) {return std::to_string(i); },								noWidget},
+		{"Frame",		40,		true, false, [](CameraSnapshot snap, int i) {return std::to_string(snap.frame); },						noWidget},
 		{"Time",		60,		true, false, [](CameraSnapshot snap, int i) {return to_string_with_precision(snap.timeStamp, 2); }, noWidget},
 		{"Location",	200,	true, false, [](CameraSnapshot snap, int i) {return vector_to_string(snap.location); },				noWidget},
 		{"Rotation",	140,	true, false, [](CameraSnapshot snap, int i) {return rotator_to_string(snap.rotation.ToRotator()); },noWidget},
 		{"FOV",			40,		true, false, [](CameraSnapshot snap, int i) {return to_string_with_precision(snap.FOV, 1); },		noWidget},
 		{"Remove",		80,		true, true, [](CameraSnapshot snap, int i) {return ""; },
 			[](std::shared_ptr<DollyCam> dollyCam, CameraSnapshot snap, int i) {
-				string buttonIdentifier = "Remove##" + to_string(i);
+				std::string buttonIdentifier = "Remove##" + std::to_string(i);
 				if (ImGui::Button(buttonIdentifier.c_str()))
 				{
 					dollyCam->DeleteFrameByIndex(i);
@@ -60,7 +61,7 @@ void DollyCamPlugin::Render()
 	const ImGuiCol bg_color_idx = ImGuiCol_WindowBg;
 	context->Style.Colors[bg_color_idx].w = 0.75;
 
-	string menuName = "Snapshots";
+	std::string menuName = "Snapshots";
 	if (!ImGui::Begin(menuName.c_str(), &isWindowOpen, ImGuiWindowFlags_ResizeFromAnySide))
 	{
 		// Early out if the window is collapsed, as an optimization.

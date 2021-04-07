@@ -13,12 +13,14 @@ BAKKESMOD_PLUGIN(DollyCamPlugin, "Dollycam plugin", "2", PLUGINTYPE_REPLAY | PLU
 
 bool DollyCamPlugin::IsApplicable()
 {
-	if (gameWrapper->IsInReplay() || gameWrapper->IsInGame())
+	if (gameWrapper->IsInReplay() || gameWrapper->IsInGame() || gameWrapper->IsInOnlineGame())
 	{
 		CameraWrapper camera = gameWrapper->GetCamera();
+		cvarManager->log("hmm" + std::to_string(camera.IsNull()));
 		if (!camera.IsNull())
 		{
 			std::string cameraState = gameWrapper->GetCamera().GetCameraState();
+			cvarManager->log(cameraState);
 			return cameraState.compare("CameraState_ReplayFly_TA") == 0;
 		}
 	}
@@ -49,8 +51,8 @@ void DollyCamPlugin::onLoad()
 	cvarManager->registerCvar("dolly_render_frame", "1", "Render frame numbers on the path", true, true, 0, true, 1).addOnValueChanged(bind(&DollyCamPlugin::OnRenderFramesChanged, this, _1, _2));
 
 	cvarManager->registerNotifier("dolly_path_clear", bind(&DollyCamPlugin::OnAllCommand, this, _1), "Clears the current dollycam path", PERMISSION_ALL);
-	cvarManager->registerNotifier("dolly_snapshot_take", bind(&DollyCamPlugin::OnReplayCommand, this, _1), "Saves the current camera view as snapshot", PERMISSION_REPLAY);
-	cvarManager->registerNotifier("dolly_activate", bind(&DollyCamPlugin::OnReplayCommand, this, _1), "Activates the dollycam (Plays current path) ", PERMISSION_REPLAY);
+	cvarManager->registerNotifier("dolly_snapshot_take", bind(&DollyCamPlugin::OnReplayCommand, this, _1), "Saves the current camera view as snapshot",  PERMISSION_ALL);
+	cvarManager->registerNotifier("dolly_activate", bind(&DollyCamPlugin::OnReplayCommand, this, _1), "Activates the dollycam (Plays current path) ", PERMISSION_ALL);
 	cvarManager->registerNotifier("dolly_deactivate", bind(&DollyCamPlugin::OnReplayCommand, this, _1), "Deactivates the dollycam", PERMISSION_REPLAY);
 	cvarManager->registerNotifier("dolly_replayinfo", bind(&DollyCamPlugin::OnInReplayCommand, this, _1), "Prints current replay information to the console", PERMISSION_REPLAY);
 
@@ -72,7 +74,7 @@ void DollyCamPlugin::onLoad()
 	cvarManager->registerNotifier("dolly_snapshot_select", bind(&DollyCamPlugin::OnSnapshotModifyCommand, this, _1), "Selects snapshot for editing (WIP, NOT WORKING)", PERMISSION_REPLAY);
 
 	//cvarManager->registerNotifier("dolly_live_openfly", bind(&DollyCamPlugin::OnLiveCommand, this, _1), "Automatically goes to flycam (WIP, NOT WORKING)", PERMISSION_REPLAY);
-	//cvarManager->registerNotifier("dolly_live_playpath", bind(&DollyCamPlugin::OnLiveCommand, this, _1), "Plays the loaded path in the current game (REQUIRES SPECTATOR, WIP)", PERMISSION_ALL);
+	cvarManager->registerNotifier("dolly_live_playpath", bind(&DollyCamPlugin::OnLiveCommand, this, _1), "Plays the loaded path in the current game (REQUIRES SPECTATOR, WIP)", PERMISSION_ALL);
 
 
 	cvarManager->registerNotifier("dolly_bezier_weight", bind(&DollyCamPlugin::OnBezierCommand, this, _1), "Change bezier weight of given snapshot (Unsupported?). Usage: dolly_bezier_weight", PERMISSION_ALL);
@@ -87,7 +89,7 @@ void DollyCamPlugin::onUnload()
 
 void DollyCamPlugin::PrintSnapshotInfo(CameraSnapshot shot)
 {
-	cvarManager->log("Frame: " + to_string(shot.frame));
+	cvarManager->log("Frame: " + std::to_string(shot.frame));
 	cvarManager->log("Time: " + to_string_with_precision(shot.timeStamp, 5));
 	cvarManager->log("FOV: " + to_string_with_precision(shot.FOV, 5));
 	cvarManager->log("Location " + vector_to_string(shot.location));
@@ -107,16 +109,17 @@ void DollyCamPlugin::onReplayClose(std::string funcName)
 
 void DollyCamPlugin::onTick(std::string funcName)
 {
-
+	cvarManager->log("on tick" + std::to_string(dollyCam->IsActive()));
 	if (!IsApplicable() || !dollyCam->IsActive())
 		return;
+	cvarManager->log("appli");
 	dollyCam->Apply();
 }
 
 //[&cm = this->cvarManager, &gw = this->gameWrapper](vector<string>)
-void DollyCamPlugin::OnAllCommand(vector<string> params)
+void DollyCamPlugin::OnAllCommand(std::vector<std::string> params)
 {
-	string command = params.at(0);
+	std::string command = params.at(0);
 	if (command.compare("dolly_path_clear") == 0)
 	{
 		dollyCam->Reset();
@@ -129,7 +132,7 @@ void DollyCamPlugin::OnAllCommand(vector<string> params)
 			cvarManager->log("Usage: " + params.at(0) + " filename");
 			return;
 		}
-		string filename = params.at(1);
+		std::string filename = params.at(1);
 		dollyCam->SaveToFile(filename);
 	} 
 	else if (command.compare("dolly_path_load") == 0)
@@ -139,7 +142,7 @@ void DollyCamPlugin::OnAllCommand(vector<string> params)
 			cvarManager->log("Usage: " + params.at(0) + " filename");
 			return;
 		}
-		string filename = params.at(1);
+		std::string filename = params.at(1);
 		if (!file_exists(filename))
 		{
 			cvarManager->log("File does not exist!");
@@ -151,9 +154,9 @@ void DollyCamPlugin::OnAllCommand(vector<string> params)
 
 
 
-void DollyCamPlugin::OnCamCommand(vector<string> params)
+void DollyCamPlugin::OnCamCommand(std::vector<std::string> params)
 {
-	string command = params.at(0);
+	std::string command = params.at(0);
 	CameraWrapper camera = gameWrapper->GetCamera();
 	if (command.compare("dolly_cam_show") == 0 && !camera.IsNull())
 	{
@@ -217,7 +220,7 @@ void DollyCamPlugin::OnCamCommand(vector<string> params)
 	}
 }
 
-void DollyCamPlugin::OnInReplayCommand(vector<string> params)
+void DollyCamPlugin::OnInReplayCommand(std::vector<std::string> params)
 {
 	if (!gameWrapper->IsInReplay())
 	{
@@ -250,7 +253,7 @@ void DollyCamPlugin::OnInReplayCommand(vector<string> params)
 	}
 }
 
-void DollyCamPlugin::OnReplayCommand(vector<string> params)
+void DollyCamPlugin::OnReplayCommand(std::vector<std::string> params)
 {
 	if (!IsApplicable())
 	{
@@ -258,7 +261,7 @@ void DollyCamPlugin::OnReplayCommand(vector<string> params)
 		return;
 	}
 		
-	string command = params.at(0);
+	std::string command = params.at(0);
 	if (command.compare("dolly_snapshot_take") == 0)
 	{
 		CameraSnapshot snapshot = dollyCam->TakeSnapshot(true);
@@ -268,8 +271,8 @@ void DollyCamPlugin::OnReplayCommand(vector<string> params)
 		}
 		else
 		{
-			cvarManager->log("Saved snapshot #" + to_string(snapshot.frame));
-			cvarManager->executeCommand("dolly_snapshot_info " + to_string(snapshot.frame), false);
+			cvarManager->log("Saved snapshot #" + std::to_string(snapshot.frame));
+			cvarManager->executeCommand("dolly_snapshot_info " + std::to_string(snapshot.frame), false);
 		}
 	}
 	else if (command.compare("dolly_deactivate") == 0)
@@ -282,7 +285,7 @@ void DollyCamPlugin::OnReplayCommand(vector<string> params)
 	}
 }
 
-void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
+void DollyCamPlugin::OnSnapshotCommand(std::vector<std::string> params)
 {
 	if (!IsApplicable())
 	{
@@ -290,18 +293,18 @@ void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
 		return;
 	}
 
-	string command = params.at(0);
+	std::string command = params.at(0);
 	if (command.compare("dolly_snapshot_list") == 0)
 	{
-		vector<int> frames = dollyCam->GetUsedFrames();
+		std::vector<int> frames = dollyCam->GetUsedFrames();
 		int index = 1;
 		for (auto it = frames.begin(); it != frames.end(); it++)
 		{
 			CameraSnapshot snapshot = dollyCam->GetSnapshot(*it);
-			cvarManager->log("(" + to_string(index) +  ") ID: " + to_string(snapshot.frame) + ", [" + to_string_with_precision(snapshot.weight, 2) + "][" + to_string_with_precision(snapshot.timeStamp, 2) + "][" + to_string_with_precision(snapshot.FOV, 2) + "] (" + vector_to_string(snapshot.location) + ") (" + rotator_to_string(snapshot.rotation.ToRotator()) + " )");
+			cvarManager->log("(" + std::to_string(index) +  ") ID: " + std::to_string(snapshot.frame) + ", [" + to_string_with_precision(snapshot.weight, 2) + "][" + to_string_with_precision(snapshot.timeStamp, 2) + "][" + to_string_with_precision(snapshot.FOV, 2) + "] (" + vector_to_string(snapshot.location) + ") (" + rotator_to_string(snapshot.rotation.ToRotator()) + " )");
 			index++;
 		}
-		cvarManager->log("Current path has " + to_string(frames.size()) + " snapshots.");
+		cvarManager->log("Current path has " + std::to_string(frames.size()) + " snapshots.");
 	} 
 	else if (command.compare("dolly_snapshot_info") == 0)
 	{
@@ -316,11 +319,11 @@ void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
 		else 
 		{
 			CameraSnapshot snapshot = dollyCam->GetSnapshot(frame);
-			cvarManager->log("ID " + to_string(snapshot.frame) + ". FOV: " + to_string(snapshot.FOV) + ". Time: " + to_string_with_precision(snapshot.timeStamp, 3) + ". Weight: " + to_string_with_precision(snapshot.weight, 3));
+			cvarManager->log("ID " + std::to_string(snapshot.frame) + ". FOV: " + std::to_string(snapshot.FOV) + ". Time: " + to_string_with_precision(snapshot.timeStamp, 3) + ". Weight: " + to_string_with_precision(snapshot.weight, 3));
 			cvarManager->log("Location " + vector_to_string(snapshot.location));
 			cvarManager->log("Rotation " + rotator_to_string(snapshot.rotation.ToRotator()));
 			if (params.size() == 3) {
-				string action = params.at(2);
+				std::string action = params.at(2);
 				if (action.compare("set") == 0) {
 					CameraWrapper camera = gameWrapper->GetCamera();
 					camera.SetLocation(snapshot.location);
@@ -366,9 +369,9 @@ void DollyCamPlugin::OnSnapshotCommand(vector<string> params)
 	}
 }
 
-void DollyCamPlugin::OnSnapshotModifyCommand(vector<string> params)
+void DollyCamPlugin::OnSnapshotModifyCommand(std::vector<std::string> params)
 {
-	string command = params.at(0);
+	std::string command = params.at(0);
 	if (!gameWrapper->IsInGame())
 	{
 		cvarManager->log("You need to be in a game to execute this command");
@@ -384,7 +387,7 @@ void DollyCamPlugin::OnSnapshotModifyCommand(vector<string> params)
 		int snapshot_id = get_safe_float(params.at(1));
 		if (!dollyCam->IsFrameUsed(snapshot_id))
 		{
-			cvarManager->log("Snapshot #" + to_string(snapshot_id) + " not found");
+			cvarManager->log("Snapshot #" + std::to_string(snapshot_id) + " not found");
 			return;
 		}
 		selectedSnapshot = dollyCam->GetSnapshot(snapshot_id);
@@ -392,10 +395,10 @@ void DollyCamPlugin::OnSnapshotModifyCommand(vector<string> params)
 	}
 }
 
-void DollyCamPlugin::OnLiveCommand(vector<string> params)
+void DollyCamPlugin::OnLiveCommand(std::vector<std::string> params)
 {
-	string command = params.at(0);
-	if (!gameWrapper->IsInGame())
+	std::string command = params.at(0);
+	if (!gameWrapper->IsInOnlineGame())
 	{
 		cvarManager->log("You need to be in a game to execute this command");
 		return;
@@ -403,7 +406,7 @@ void DollyCamPlugin::OnLiveCommand(vector<string> params)
 	if (command.compare("dolly_live_playpath") == 0)
 	{
 		//Transform the path to make it so the first frame starts at the current frame
-		int currentFrame = gameWrapper->GetGameEventAsServer().GetReplayDirector().GetReplay().GetCurrentFrame() + 1;
+		int currentFrame = gameWrapper->GetOnlineGame().GetReplayDirector().GetReplay().GetCurrentFrame() + 1;
 		auto path = dollyCam->GetCurrentPath();
 		int startFrame = path->begin()->first;
 		std::shared_ptr<savetype> newPath = std::make_shared<savetype>(savetype());
@@ -437,9 +440,9 @@ void DollyCamPlugin::onRender(CanvasWrapper canvas)
 	dollyCam->Render(canvas);
 }
 
-void DollyCamPlugin::OnInterpModeChanged(string oldValue, CVarWrapper newCvar)
+void DollyCamPlugin::OnInterpModeChanged(std::string oldValue, CVarWrapper newCvar)
 {
-	string cvarName = newCvar.getCVarName();
+	std::string cvarName = newCvar.getCVarName();
 	if (cvarName.compare("dolly_interpmode") == 0)
 	{
 		cvarManager->executeCommand("dolly_interpmode_location " + newCvar.getStringValue(), false);
@@ -457,19 +460,19 @@ void DollyCamPlugin::OnInterpModeChanged(string oldValue, CVarWrapper newCvar)
 	}
 }
 
-void DollyCamPlugin::OnRenderFramesChanged(string oldValue, CVarWrapper newCvar)
+void DollyCamPlugin::OnRenderFramesChanged(std::string oldValue, CVarWrapper newCvar)
 {
 	dollyCam->SetRenderFrames(newCvar.getBoolValue());
 }
 
-void DollyCamPlugin::OnChaikinChanged(string oldValue, CVarWrapper newCvar)
+void DollyCamPlugin::OnChaikinChanged(std::string oldValue, CVarWrapper newCvar)
 {
 	dollyCam->RefreshInterpData();
 }
 
-void DollyCamPlugin::OnBezierCommand(vector<string> params)
+void DollyCamPlugin::OnBezierCommand(std::vector<std::string> params)
 {
-	string command = params.at(0);
+	std::string command = params.at(0);
 	if (command.compare("dolly_bezier_weight") == 0)
 	{
 		if (params.size() < 2)
@@ -480,20 +483,20 @@ void DollyCamPlugin::OnBezierCommand(vector<string> params)
 		int id = get_safe_int(params.at(1));
 		if (!dollyCam->IsFrameUsed(id))
 		{
-			cvarManager->log("Frame #" + to_string(id) + " does not have a snapshot attached");
+			cvarManager->log("Frame #" + std::to_string(id) + " does not have a snapshot attached");
 			return;
 		}
 
 		CameraSnapshot snapshot = dollyCam->GetSnapshot(id);
 		if (params.size() == 2)
 		{
-			cvarManager->log("Snapshot #" + to_string(snapshot.frame) + " weight: " + to_string(snapshot.weight));
+			cvarManager->log("Snapshot #" + std::to_string(snapshot.frame) + " weight: " + std::to_string(snapshot.weight));
 		}
 		else {
 			float weight = get_safe_float(params.at(2));
 			snapshot.weight = weight;
 			dollyCam->InsertSnapshot(snapshot);
-			cvarManager->log("Snapshot #" + to_string(snapshot.frame) + " saved with weight: " + to_string(snapshot.weight));
+			cvarManager->log("Snapshot #" + std::to_string(snapshot.frame) + " saved with weight: " + std::to_string(snapshot.weight));
 		}
 	}
 

@@ -26,11 +26,11 @@ public:
 //Mock game applier for simulating data
 class MockGameApplier : public IGameApplier {
 private:
-	ofstream output;
+	std::ofstream output;
 	NewPOV pov;
 	float time;
 public:
-	MockGameApplier(string filename);
+	MockGameApplier(std::string filename);
 	~MockGameApplier();
 	void SetTime(float time);
 	void SetPOV(Vector location, CustomRotator rotation, float FOV);
