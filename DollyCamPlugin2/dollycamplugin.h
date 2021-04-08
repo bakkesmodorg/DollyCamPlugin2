@@ -1,5 +1,5 @@
 #pragma once
-#pragma comment(lib, "BakkesMod.lib")
+#pragma comment(lib, "PluginSDK.lib")
 #include "bakkesmod\plugin\bakkesmodplugin.h"
 #include "bakkesmod\plugin\pluginwindow.h"
 #include "dollycam.h"
