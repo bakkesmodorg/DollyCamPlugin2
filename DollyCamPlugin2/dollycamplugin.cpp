@@ -45,6 +45,8 @@ void DollyCamPlugin::onLoad()
 	cvarManager->registerCvar("dolly_interpmode_rotation", "5", "Used interp mode for rotation", true, true, 0, true, 2000)
 		.addOnValueChanged(bind(&DollyCamPlugin::OnInterpModeChanged, this, _1, _2));
 
+    pathDirectory = std::make_shared<std::string>("");
+    cvarManager->registerCvar("dolly_path_directory", "", "Location for saving and loading paths", true).bindTo(pathDirectory);
 	
 	cvarManager->registerCvar("dolly_render", "1", "Render the current camera path", true, true, 0, true, 1).bindTo(renderCameraPath);
 
@@ -79,7 +81,7 @@ void DollyCamPlugin::onLoad()
 
 	cvarManager->registerNotifier("dolly_bezier_weight", bind(&DollyCamPlugin::OnBezierCommand, this, _1), "Change bezier weight of given snapshot (Unsupported?). Usage: dolly_bezier_weight", PERMISSION_ALL);
 	cvarManager->registerCvar("dolly_chaikin_degree", "0", "Amount of times to apply chaikin to the spline", true, true, 0, true, 20).addOnValueChanged(bind(&DollyCamPlugin::OnChaikinChanged, this, _1, _2));;
-	cvarManager->registerCvar("dolly_spline_acc", "1000", "Spline interpolation time accuracy", true, true, 100, false);
+	cvarManager->registerCvar("dolly_spline_acc", "7500", "Spline interpolation time accuracy", true, true, 100, false);
 	dollyCam->SetRenderPath(true);
 }
 
@@ -133,7 +135,7 @@ void DollyCamPlugin::OnAllCommand(std::vector<std::string> params)
 			return;
 		}
 		std::string filename = params.at(1);
-		dollyCam->SaveToFile(filename);
+		dollyCam->SaveToFile(*pathDirectory, filename);
 	} 
 	else if (command.compare("dolly_path_load") == 0)
 	{
@@ -143,12 +145,7 @@ void DollyCamPlugin::OnAllCommand(std::vector<std::string> params)
 			return;
 		}
 		std::string filename = params.at(1);
-		if (!file_exists(filename))
-		{
-			cvarManager->log("File does not exist!");
-			return;
-		}
-		dollyCam->LoadFromFile(filename);
+		dollyCam->LoadFromFile(*pathDirectory, filename);
 	}
 }
 

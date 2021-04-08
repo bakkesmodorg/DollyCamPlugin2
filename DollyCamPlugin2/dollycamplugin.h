@@ -9,6 +9,7 @@ class DollyCamPlugin : public BakkesMod::Plugin::BakkesModPlugin, public BakkesM
 private:
 	std::shared_ptr<DollyCam> dollyCam;
 	std::shared_ptr<bool> renderCameraPath;
+    std::shared_ptr<std::string> pathDirectory;
 	CameraSnapshot selectedSnapshot;
 	bool IsApplicable();
 

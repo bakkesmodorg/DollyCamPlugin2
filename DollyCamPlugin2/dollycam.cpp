@@ -423,23 +423,31 @@ std::shared_ptr<InterpStrategy> DollyCam::CreateInterpStrategy(int interpStrateg
 	return std::make_shared<LinearInterpStrategy>(LinearInterpStrategy(currentPath, chaikinDegree));
 }
 
-void DollyCam::SaveToFile(std::string filename)
+void DollyCam::SaveToFile(const std::string& saveDirectory, const std::string& filename)
 {
+    std::filesystem::path filePath = GetFilePath(saveDirectory, filename);
+
 	std::map<std::string, CameraSnapshot> pathCopy;
 	for (auto& i : *currentPath)
 	{
 		pathCopy.insert_or_assign(std::to_string(i.first), i.second);
 	}
 	json j = pathCopy;
-	std::ofstream myfile;
-	myfile.open(filename);
+	std::ofstream myfile(filePath);
 	myfile << j.dump(4);
 	myfile.close();
 }
 
-void DollyCam::LoadFromFile(std::string filename)
+bool DollyCam::LoadFromFile(const std::string& loadDirectory, const std::string& filename)
 {
-	std::ifstream i(filename);
+    std::filesystem::path filePath = GetFilePath(loadDirectory, filename);
+    if (!std::filesystem::exists(filePath))
+	{
+		cvarManager->log("File does not exist!");
+		return false;
+	}
+
+	std::ifstream i(filePath);
 	json j;
 	i >> j;
 	currentPath->clear();
@@ -454,6 +462,23 @@ void DollyCam::LoadFromFile(std::string filename)
 
 	this->RefreshInterpData();
 	this->RefreshInterpDataRotation();
+
+    return true;
+}
+
+std::filesystem::path DollyCam::GetFilePath(const std::string& loadDirectory, const std::string& filename)
+{
+    std::filesystem::path Output = loadDirectory;
+
+    if(loadDirectory.empty())
+    {
+        Output = gameWrapper->GetDataFolder() / "campaths";
+    }
+
+    //Append filename to path using directory separator
+    Output /= filename;
+
+    return Output;
 }
 
 std::shared_ptr<savetype> DollyCam::GetCurrentPath()
