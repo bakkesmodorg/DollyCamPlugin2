@@ -132,7 +132,7 @@ float diff = .0f;
 bool isFirst = true;
 void DollyCam::Apply()
 {
-	cvarManager->log("Wa: ");
+	//cvarManager->log("Wa: ");
 	int currentFrame = 0;
 	ServerWrapper sw(NULL);
 	if (gameWrapper->IsInReplay())
@@ -154,10 +154,10 @@ void DollyCam::Apply()
 	{
 		return;
 	}
-	cvarManager->log("Frame: " + std::to_string(currentFrame));
+	//cvarManager->log("Frame: " + std::to_string(currentFrame));
 	if (currentFrame < currentPath->begin()->first || currentFrame >(--currentPath->end())->first)
 		return;
-	cvarManager->log("Can play: ");
+	//cvarManager->log("Can play: ");
 	if (currentFrame == currentPath->begin()->first)
 	{
 		if (isFirst) {
@@ -180,7 +180,7 @@ void DollyCam::Apply()
 	if (pov.FOV < 1) { //Invalid camerastate
 		return;
 	}
-	cvarManager->log("Applying: ");
+	//cvarManager->log("Applying: ");
 	gameApplier->SetPOV(pov.location, pov.rotation, pov.FOV);
 	//flyCam.SetPOV(pov.ToPOV());
 }

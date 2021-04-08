@@ -9,18 +9,18 @@
 
 using namespace std::placeholders;
 
-BAKKESMOD_PLUGIN(DollyCamPlugin, "Dollycam plugin", "2", PLUGINTYPE_REPLAY | PLUGINTYPE_SPECTATOR)
+BAKKESMOD_PLUGIN(DollyCamPlugin, "Dollycam plugin", "2.1", PLUGINTYPE_REPLAY | PLUGINTYPE_SPECTATOR)
 
 bool DollyCamPlugin::IsApplicable()
 {
 	if (gameWrapper->IsInReplay() || gameWrapper->IsInGame() || gameWrapper->IsInOnlineGame())
 	{
 		CameraWrapper camera = gameWrapper->GetCamera();
-		cvarManager->log("hmm" + std::to_string(camera.IsNull()));
+		//cvarManager->log("hmm" + std::to_string(camera.IsNull()));
 		if (!camera.IsNull())
 		{
 			std::string cameraState = gameWrapper->GetCamera().GetCameraState();
-			cvarManager->log(cameraState);
+			//cvarManager->log(cameraState);
 			return cameraState.compare("CameraState_ReplayFly_TA") == 0;
 		}
 	}
@@ -111,10 +111,10 @@ void DollyCamPlugin::onReplayClose(std::string funcName)
 
 void DollyCamPlugin::onTick(std::string funcName)
 {
-	cvarManager->log("on tick" + std::to_string(dollyCam->IsActive()));
+	//cvarManager->log("on tick" + std::to_string(dollyCam->IsActive()));
 	if (!IsApplicable() || !dollyCam->IsActive())
 		return;
-	cvarManager->log("appli");
+	//cvarManager->log("appli");
 	dollyCam->Apply();
 }
 
