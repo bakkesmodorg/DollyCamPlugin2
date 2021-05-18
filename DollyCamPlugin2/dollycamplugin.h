@@ -1,5 +1,5 @@
 #pragma once
-#pragma comment(lib, "BakkesMod.lib")
+#pragma comment(lib, "PluginSDK.lib")
 #include "bakkesmod\plugin\bakkesmodplugin.h"
 #include "bakkesmod\plugin\pluginwindow.h"
 #include "dollycam.h"
@@ -9,6 +9,7 @@ class DollyCamPlugin : public BakkesMod::Plugin::BakkesModPlugin, public BakkesM
 private:
 	std::shared_ptr<DollyCam> dollyCam;
 	std::shared_ptr<bool> renderCameraPath;
+    std::shared_ptr<std::string> pathDirectory;
 	CameraSnapshot selectedSnapshot;
 	bool IsApplicable();
 

@@ -80,9 +80,6 @@
     <ClInclude Include="serialization.h">
       <Filter>Serialization</Filter>
     </ClInclude>
-    <ClInclude Include="nlohmann\json.hpp">
-      <Filter>Serialization\json</Filter>
-    </ClInclude>
     <ClInclude Include="imguifilebrowser\imfilebrowser.h">
       <Filter>imgui\headers</Filter>
     </ClInclude>
@@ -127,6 +124,9 @@
     </ClInclude>
     <ClInclude Include="interpstrategies\tinyspline\parson.h">
       <Filter>InterpolationStrategies\Spline\TinySpline</Filter>
+    </ClInclude>
+    <ClInclude Include="json\single_include\nlohmann\json.hpp">
+      <Filter>Serialization\json</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

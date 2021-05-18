@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <map>
+#include <filesystem>
 #include "utils\customrotator.h"
 #include "bakkesmod\plugin\bakkesmodplugin.h"
 #include "gameapplier.h"
@@ -50,8 +51,9 @@ public:
 	void RefreshInterpDataRotation();
 	std::string GetInterpolationMethod(bool locationInterp);
 	std::shared_ptr<InterpStrategy> CreateInterpStrategy(int interpStrategy);
-	void SaveToFile(std::string filename);
-	void LoadFromFile(std::string filename);
+	void SaveToFile(const std::string& saveDirectory, const std::string& filename);
+	bool LoadFromFile(const std::string& loadDirectory, const std::string& filename);
+    std::filesystem::path GetFilePath(const std::string& loadDirectory, const std::string& filename);
 	std::shared_ptr<savetype> GetCurrentPath();
 	void SetCurrentPath(std::shared_ptr<savetype> newPath);
 };
