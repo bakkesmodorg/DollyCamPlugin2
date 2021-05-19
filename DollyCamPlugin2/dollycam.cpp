@@ -145,11 +145,11 @@ void DollyCam::Apply()
 		sw = gameWrapper->GetGameEventAsServer();
 		currentFrame = sw.GetReplayDirector().GetReplay().GetCurrentFrame();
 	}
-	else if (gameWrapper->IsInOnlineGame())
+	/*else if (gameWrapper->IsInOnlineGame())
 	{
 		sw = gameWrapper->GetOnlineGame();
 		currentFrame = sw.GetReplayDirector().GetReplay().GetCurrentFrame();
-	}
+	}*/
 	else
 	{
 		return;

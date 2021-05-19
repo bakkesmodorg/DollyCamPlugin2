@@ -13,7 +13,7 @@ BAKKESMOD_PLUGIN(DollyCamPlugin, "Dollycam plugin", "2.1", PLUGINTYPE_REPLAY | P
 
 bool DollyCamPlugin::IsApplicable()
 {
-	if (gameWrapper->IsInReplay() || gameWrapper->IsInGame() || gameWrapper->IsInOnlineGame())
+	if (gameWrapper->IsInReplay() || gameWrapper->IsInGame() /*|| gameWrapper->IsInOnlineGame()*/)
 	{
 		CameraWrapper camera = gameWrapper->GetCamera();
 		//cvarManager->log("hmm" + std::to_string(camera.IsNull()));
@@ -53,8 +53,8 @@ void DollyCamPlugin::onLoad()
 	cvarManager->registerCvar("dolly_render_frame", "1", "Render frame numbers on the path", true, true, 0, true, 1).addOnValueChanged(bind(&DollyCamPlugin::OnRenderFramesChanged, this, _1, _2));
 
 	cvarManager->registerNotifier("dolly_path_clear", bind(&DollyCamPlugin::OnAllCommand, this, _1), "Clears the current dollycam path", PERMISSION_ALL);
-	cvarManager->registerNotifier("dolly_snapshot_take", bind(&DollyCamPlugin::OnReplayCommand, this, _1), "Saves the current camera view as snapshot",  PERMISSION_ALL);
-	cvarManager->registerNotifier("dolly_activate", bind(&DollyCamPlugin::OnReplayCommand, this, _1), "Activates the dollycam (Plays current path) ", PERMISSION_ALL);
+	cvarManager->registerNotifier("dolly_snapshot_take", bind(&DollyCamPlugin::OnReplayCommand, this, _1), "Saves the current camera view as snapshot", PERMISSION_REPLAY);
+	cvarManager->registerNotifier("dolly_activate", bind(&DollyCamPlugin::OnReplayCommand, this, _1), "Activates the dollycam (Plays current path) ", PERMISSION_REPLAY);
 	cvarManager->registerNotifier("dolly_deactivate", bind(&DollyCamPlugin::OnReplayCommand, this, _1), "Deactivates the dollycam", PERMISSION_REPLAY);
 	cvarManager->registerNotifier("dolly_replayinfo", bind(&DollyCamPlugin::OnInReplayCommand, this, _1), "Prints current replay information to the console", PERMISSION_REPLAY);
 
@@ -76,7 +76,7 @@ void DollyCamPlugin::onLoad()
 	cvarManager->registerNotifier("dolly_snapshot_select", bind(&DollyCamPlugin::OnSnapshotModifyCommand, this, _1), "Selects snapshot for editing (WIP, NOT WORKING)", PERMISSION_REPLAY);
 
 	//cvarManager->registerNotifier("dolly_live_openfly", bind(&DollyCamPlugin::OnLiveCommand, this, _1), "Automatically goes to flycam (WIP, NOT WORKING)", PERMISSION_REPLAY);
-	cvarManager->registerNotifier("dolly_live_playpath", bind(&DollyCamPlugin::OnLiveCommand, this, _1), "Plays the loaded path in the current game (REQUIRES SPECTATOR, WIP)", PERMISSION_ALL);
+	//cvarManager->registerNotifier("dolly_live_playpath", bind(&DollyCamPlugin::OnLiveCommand, this, _1), "Plays the loaded path in the current game (REQUIRES SPECTATOR, WIP)", PERMISSION_ALL);
 
 
 	cvarManager->registerNotifier("dolly_bezier_weight", bind(&DollyCamPlugin::OnBezierCommand, this, _1), "Change bezier weight of given snapshot (Unsupported?). Usage: dolly_bezier_weight", PERMISSION_ALL);
